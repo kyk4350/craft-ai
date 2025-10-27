@@ -50,19 +50,21 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
 ## 2주차: 데이터 수집 및 고객 세분화
 
 ### 데이터 수집
-- [ ] Kaggle API 설정
-- [ ] Kaggle 마케팅 데이터셋 다운로드
-  - [ ] "Social Media Marketing Dataset"
-  - [ ] "Customer Segmentation Dataset"
-- [ ] 공공데이터포털 API 연동
-- [ ] 데이터 수집 스크립트 작성 (`scripts/collect_data.py`)
-- [ ] 수집된 데이터 검증 및 정제
+- [x] Kaggle API 설정
+- [x] Kaggle 마케팅 데이터셋 다운로드
+  - [x] "jackdaoud/marketing-data" (iFood 데이터)
+  - [x] "vjchoudhary7/customer-segmentation-tutorial-in-python"
+- [x] 데이터 수집 스크립트 작성 (`scripts/collect_data.py`)
+- [x] 수집된 데이터 검증 및 정제 (`scripts/verify_data.py`)
 
 ### Gemini API 합성 데이터 생성
-- [ ] Gemini API 키 설정
-- [ ] Gemini API 연동 테스트
-- [ ] 합성 데이터 생성 프롬프트 작성
-- [ ] 다양한 세그먼트별 합성 데이터 생성 (최소 1,000개)
+- [x] Gemini API 키 설정
+- [x] Gemini API 연동 테스트
+- [x] Gemini 2.5 Flash 모델 업데이트
+- [x] 합성 데이터 생성 프롬프트 작성
+- [x] 테스트 데이터 생성 성공 (5개 프로필)
+- [x] 합성 데이터 생성 스크립트 작성 (`scripts/generate_synthetic_data.py`)
+- [ ] 전체 합성 데이터 생성 실행 (1,000개)
 - [ ] 데이터 품질 검증
 
 ### 데이터 세분화 모듈
