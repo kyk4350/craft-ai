@@ -51,6 +51,11 @@ class GeminiService:
                 generation_config=generation_config
             )
 
+            # finish_reason 확인
+            if not response.parts:
+                logger.error(f"응답 없음. finish_reason: {response.candidates[0].finish_reason}")
+                raise Exception(f"텍스트 생성 실패: finish_reason={response.candidates[0].finish_reason}")
+
             return response.text
 
         except Exception as e:

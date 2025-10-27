@@ -7,7 +7,67 @@
 
 ---
 
-### 2. Stability AI (이미지 생성)
+### 2. Kaggle API (데이터셋 다운로드)
+
+**용도**: 마케팅 데이터셋 다운로드 (2주차)
+
+**가입 링크**: https://www.kaggle.com/
+
+**가입 절차**:
+1. https://www.kaggle.com/ 접속
+2. "Register" 클릭하여 회원가입
+3. 로그인 후 오른쪽 상단 프로필 아이콘 클릭
+4. "Settings" 선택
+5. 아래로 스크롤하여 "API" 섹션 찾기
+6. "Create New API Token" 클릭
+7. `kaggle.json` 파일 자동 다운로드
+
+**API 키 설정**:
+
+Mac/Linux:
+```bash
+# 디렉토리 생성
+mkdir -p ~/.kaggle
+
+# kaggle.json 파일 이동
+mv ~/Downloads/kaggle.json ~/.kaggle/
+
+# 권한 설정 (중요!)
+chmod 600 ~/.kaggle/kaggle.json
+```
+
+Windows:
+```cmd
+# 디렉토리 생성
+mkdir C:\Users\<username>\.kaggle
+
+# kaggle.json 파일을 위 디렉토리로 이동
+```
+
+**kaggle.json 형식**:
+```json
+{
+  "username": "your_username",
+  "key": "xxxxxxxxxxxxxxxxxxxxxx"
+}
+```
+
+**테스트**:
+```bash
+# Kaggle CLI 설치
+pip install kaggle
+
+# 테스트
+kaggle datasets list
+```
+
+**무료**:
+- 모든 공개 데이터셋 무료 다운로드
+- 제한 없음
+
+---
+
+### 3. Stability AI (이미지 생성)
 
 **용도**: 개발 중 저렴한 이미지 생성 ($0.004/장)
 
