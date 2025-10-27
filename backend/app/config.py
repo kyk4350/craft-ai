@@ -13,7 +13,12 @@ class Settings(BaseSettings):
 
     # API Keys
     GEMINI_API_KEY: Optional[str] = None
+    STABILITY_API_KEY: Optional[str] = None
     VOYAGE_AI_API_KEY: Optional[str] = None
+
+    # AI 모델 설정
+    IMAGE_PROVIDER: str = "mock"  # mock, stability, nanobanana
+    GEMINI_MODEL: str = "gemini-1.5-flash"  # gemini-1.5-flash, gemini-1.5-pro
 
     # 데이터베이스
     DATABASE_URL: Optional[str] = None
