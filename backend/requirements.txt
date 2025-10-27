@@ -1,42 +1,42 @@
 # FastAPI 프레임워크
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-python-multipart==0.0.6
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
 
 # 환경 변수 관리
-python-dotenv==1.0.0
+python-dotenv>=1.0.0
 
 # AI API
-google-generativeai==0.3.1
+google-generativeai>=0.3.1
 
 # HTTP 클라이언트
-requests==2.31.0
-httpx==0.25.0
+requests>=2.31.0
+httpx>=0.25.0
 
-# 데이터베이스
-sqlalchemy==2.0.23
-psycopg2-binary==2.9.9
-alembic==1.12.1
+# 데이터베이스 (2주차 이후 필요 시 설치)
+# sqlalchemy>=2.0.23
+# psycopg2-binary>=2.9.9
+# alembic>=1.12.1
 
-# Redis
-redis==5.0.1
+# Redis (2주차 이후 필요 시 설치)
+# redis>=5.0.1
 
-# Vector DB
-qdrant-client==1.7.0
+# Vector DB (4주차 이후 필요 시 설치)
+# qdrant-client>=1.7.0
 
-# 임베딩
-voyageai==0.1.0
+# 임베딩 (4주차 이후 필요 시 설치)
+# voyageai>=0.1.0
 
-# 데이터 처리
-pandas==2.1.3
-numpy==1.26.2
+# 데이터 처리 (2주차 이후 필요 시 설치)
+# pandas>=2.1.3
+# numpy>=1.26.2
 
 # 유틸리티
-pydantic==2.5.0
-pydantic-settings==2.1.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
 
-# 이미지 처리
-pillow==10.1.0
+# 이미지 처리 (3주차 이후 필요 시 설치)
+# pillow>=10.1.0
 
 # 비동기 처리
-aiofiles==23.2.1
+aiofiles>=23.2.1
