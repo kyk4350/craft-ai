@@ -30,9 +30,20 @@
 - [x] README.md 작성
 
 ### 다음 작업
-- [ ] Git 저장소 커밋 및 푸시
-- [ ] API 키 발급 (Gemini, Voyage AI)
-- [ ] 클라우드 서비스 가입 (Supabase, Upstash, Qdrant Cloud)
+- [x] Git 저장소 커밋 및 푸시
+- [x] API 키 발급
+  - [x] Gemini API
+  - [x] Stability AI
+  - [x] Supabase
+  - [x] Upstash Redis
+  - [x] Qdrant Cloud
+- [x] 클라우드 서비스 가입
+- [x] AI 모델 사용 전략 구현 (Mock, Stability, 나노바나나)
+- [x] 백엔드 개발 환경 테스트
+- [x] API 키 발급 가이드 문서 작성
+
+### 1주차 완료
+Week 1 Complete: 환경 설정 및 API 키 발급 완료
 
 ---
 
@@ -444,7 +455,7 @@
 
 ## 마일스톤
 
-- [ ] Week 1 Complete: 환경 설정 완료
+- [x] Week 1 Complete: 환경 설정 완료
 - [ ] Week 2 Complete: 데이터 세분화 완료
 - [ ] Week 3 Complete: 콘텐츠 생성 기능 완료
 - [ ] Week 4 Complete: 성과 분석 완료
@@ -454,5 +465,4 @@
 
 ---
 
-마지막 업데이트: 2025-10-27
-현재 진행 상황: 1주차 환경 설정 완료, 2주차 데이터 수집 시작
+현재 진행 상황: 1주차 완료, 2주차 시작 준비
