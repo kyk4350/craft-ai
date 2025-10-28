@@ -69,15 +69,32 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
 - [x] 데이터 품질 검증 (품질 점수: 4.7/5)
 
 ### 데이터 세분화 모듈
-- [ ] 세분화 기준 정의
-  - [ ] 나이대: 10대, 20대, 30대, 40대+
-  - [ ] 성별: 남성, 여성, 전체
-  - [ ] 관심사: 패션, 뷰티, 음식, 여행, 테크, 반려동물, 게임, 독서, 영화, 육아
-  - [ ] 플랫폼: Instagram, Facebook, 카카오톡, 네이버
-- [ ] 세분화 로직 구현 (`backend/app/services/segmentation_service.py`)
-- [ ] 세분화 데이터 저장 (JSON/CSV)
-- [ ] 세분화 API 엔드포인트 구현 (`backend/app/api/segmentation.py`)
-- [ ] 세분화 결과 시각화 스크립트
+- [x] 세분화 기준 정의
+  - [x] 나이대: 10대, 20대, 30대, 40대, 50대, 60대 이상
+  - [x] 성별: 남성, 여성, 무관
+  - [x] 관심사: 829개 고유 관심사 (자동 추출)
+  - [x] 소득: 저소득, 중소득, 중상소득, 고소득
+  - [x] 카테고리: 화장품, 식품, 패션, 전자제품, 서비스
+- [x] 세분화 로직 구현 (`backend/app/services/segmentation_service.py`)
+  - [x] 필터링 기능 (나이대, 성별, 소득, 관심사, 카테고리)
+  - [x] 키워드 검색 기능
+  - [x] 인사이트 자동 추출 (고충, 채널, 톤앤매너, 메시지 전략)
+  - [x] 성별 필터링 시 "무관" 프로필 항상 포함
+- [x] 세분화 데이터 저장 (data/processed/target_profiles.json)
+- [x] 세분화 API 엔드포인트 구현 (`backend/app/api/segmentation.py`)
+  - [x] POST /api/segmentation/filter (필터링)
+  - [x] POST /api/segmentation/search (키워드 검색)
+  - [x] GET /api/segmentation/summary (전체 요약)
+  - [x] GET /api/segmentation/insights (인사이트만 조회)
+- [x] 세분화 결과 시각화 스크립트 (visualize_segmentation.py)
+  - [x] 나이대 분포 차트 (data/processed/age_distribution.png)
+  - [x] 성별 분포 파이 차트 (data/processed/gender_distribution.png)
+  - [x] 소득 분포 차트 (data/processed/income_distribution.png)
+  - [x] 카테고리 분포 차트 (data/processed/category_distribution.png)
+  - [x] 상위 관심사 차트 (data/processed/top_interests.png)
+  - [x] 상위 고충 차트 (data/processed/top_pain_points.png)
+  - [x] 나이대×성별 히트맵 (data/processed/age_gender_heatmap.png)
+- [x] 실제 사용자 시나리오 10개 테스트 완료 (test_real_scenarios.py)
 
 ### 데이터베이스 설정
 - [ ] PostgreSQL (Supabase) 데이터베이스 생성
