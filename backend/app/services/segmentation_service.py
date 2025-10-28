@@ -74,10 +74,13 @@ class SegmentationService:
             filtered = [p for p in filtered if p.get('age_group') == age_group]
             logger.info(f"나이대 필터 ({age_group}): {len(filtered)}개")
 
-        # 성별 필터
+        # 성별 필터 ("무관"은 항상 포함)
         if gender:
-            filtered = [p for p in filtered if p.get('gender') == gender]
-            logger.info(f"성별 필터 ({gender}): {len(filtered)}개")
+            filtered = [
+                p for p in filtered
+                if p.get('gender') == gender or p.get('gender') == "무관"
+            ]
+            logger.info(f"성별 필터 ({gender} + 무관): {len(filtered)}개")
 
         # 소득 필터
         if income_level:
