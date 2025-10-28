@@ -67,31 +67,39 @@ kaggle datasets list
 
 ---
 
-### 3. Stability AI (이미지 생성)
+### 3. Replicate (이미지 생성 플랫폼)
 
-**용도**: 개발 중 저렴한 이미지 생성 ($0.004/장)
+**용도**: 개발 및 배포 단계 이미지 생성
 
-**가입 링크**: https://platform.stability.ai/
+**가입 링크**: https://replicate.com/
 
 **가입 절차**:
-1. https://platform.stability.ai/ 접속
-2. "Sign Up" 클릭
-3. Google 계정으로 가입 (또는 이메일)
+1. https://replicate.com/ 접속
+2. "Sign up" 클릭
+3. GitHub 계정으로 가입 (권장)
 4. Dashboard 접속
-5. "API Keys" 메뉴로 이동
-6. "Create API Key" 클릭
-7. 키 이름 입력 (예: "ContentCraft Development")
-8. API 키 복사 → .env 파일에 저장
+5. 우측 상단 프로필 → "Account settings" 클릭
+6. 좌측 메뉴에서 "API tokens" 선택
+7. "Create token" 클릭
+8. 토큰 이름 입력 (예: "ContentCraft AI")
+9. API 토큰 복사 → .env 파일에 저장
 
 **요금제**:
-- 최초 가입 시 무료 크레딧 제공 (보통 $10)
-- 이후 사용량만큼 과금
-- SDXL: $0.004/이미지
+- 최초 가입 시 무료 크레딧 제공 ($0.10-1 정도)
+- 이후 사용량만큼 과금 (크레딧 충전 방식)
+- **SDXL**: $0.012/이미지 (개발/테스트용)
+- **Ideogram v3 Turbo**: $0.04/이미지 (최종 결과물용)
+- **Ideogram v2**: $0.06/편집 (대화형 이미지 편집)
 
-**API 키 위치**:
+**사용 모델**:
+- `stability-ai/sdxl` - 개발 중 빠른 테스트
+- `ideogram-ai/ideogram-v3-turbo` - 최종 발표 및 데모
+- `ideogram-ai/ideogram-v2` - 이미지 편집 (Inpainting)
+
+**API 토큰 위치**:
 ```bash
 # backend/.env
-STABILITY_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxx
+REPLICATE_API_TOKEN=r8_xxxxxxxxxxxxxxxxxxxxx
 ```
 
 ---
@@ -242,19 +250,19 @@ VOYAGE_AI_API_KEY=pa-xxxxxxxxxxxxxxxxxxxxx
 # Gemini API (텍스트 생성)
 GEMINI_API_KEY=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-# Stability AI (이미지 생성 - 개발 중)
-STABILITY_API_KEY=sk-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# Replicate (이미지 생성 플랫폼)
+REPLICATE_API_TOKEN=r8_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 # Voyage AI (임베딩 - 선택사항)
 VOYAGE_AI_API_KEY=pa-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 # ===== AI 모델 설정 =====
 
-# IMAGE_PROVIDER: mock (개발 초기), stability (개발 중), nanobanana (최종)
-IMAGE_PROVIDER=mock
+# IMAGE_MODE: development (SDXL, 개발/테스트), production (Ideogram v3 Turbo, 최종)
+IMAGE_MODE=development
 
-# GEMINI_MODEL: gemini-1.5-flash (기본), gemini-1.5-pro (고품질)
-GEMINI_MODEL=gemini-1.5-flash
+# GEMINI_MODEL: gemini-2.5-flash (기본, 빠름), gemini-1.5-pro (고품질)
+GEMINI_MODEL=gemini-2.5-flash
 
 # ===== 데이터베이스 =====
 
@@ -280,7 +288,7 @@ DEBUG=True
 
 ### 지금 바로 가입 (필수)
 1. ✅ Gemini API - 이미 완료
-2. 🔴 Stability AI - 이미지 생성용 (Week 4부터 사용)
+2. 🟡 Replicate - 이미지 생성용 (Week 3부터 사용)
 3. 🔴 Supabase - 데이터베이스 (Week 2부터 사용)
 
 ### 이번 주 내 가입 (권장)
@@ -295,12 +303,12 @@ DEBUG=True
 ## 체크리스트
 
 ### 가입 완료 체크
-- [ ] Gemini API ✅ (이미 완료)
-- [ ] Stability AI
-- [ ] Supabase (PostgreSQL)
-- [ ] Upstash (Redis)
-- [ ] Qdrant Cloud (Vector DB)
-- [ ] Voyage AI (선택)
+- [x] Gemini API ✅ (이미 완료)
+- [ ] Replicate (3주차에 필요)
+- [x] Supabase (PostgreSQL)
+- [x] Upstash (Redis)
+- [x] Qdrant Cloud (Vector DB)
+- [ ] Voyage AI (선택, 4주차)
 
 ### API 키 저장 체크
 - [ ] backend/.env 파일에 모든 키 입력
@@ -308,26 +316,29 @@ DEBUG=True
 - [ ] .env 파일이 .gitignore에 있는지 확인 ✅
 
 ### 연결 테스트 체크
-- [ ] Gemini API 테스트
-- [ ] Stability AI 테스트
-- [ ] Supabase 연결 테스트
-- [ ] Redis 연결 테스트
-- [ ] Qdrant 연결 테스트
+- [x] Gemini API 테스트
+- [ ] Replicate API 테스트 (3주차)
+- [ ] Supabase 연결 테스트 (2주차)
+- [ ] Redis 연결 테스트 (3주차)
+- [ ] Qdrant 연결 테스트 (4주차)
 
 ---
 
-## 예상 비용 (월간)
+## 예상 비용 (7주 개발 기간)
 
 ```
-Gemini API (무료 tier): $0
-Stability AI: ~$2 (개발 중 500장)
-Supabase (Free): $0
-Upstash (Free): $0
-Qdrant (Free): $0
-Voyage AI (Free): $0
+Gemini API: 약 10,000원 (캐싱 적용)
+Replicate API:
+  - 개발 단계 (SDXL): 4,800원 (300장)
+  - 최종 발표 (Ideogram v3 Turbo): 2,650원 (50장)
+  - 배포 후 테스트 (SDXL): 7,200원 (450장)
+Supabase (Free): 0원
+Upstash (Free): 0원
+Qdrant (Free): 0원
+Voyage AI (Free): 0원
 
-총 예상 비용: ~$2/월 (개발 기간)
-최종 배포 시: ~$10-15/월
+총 예산: 24,650원 (예비비: 25,350원)
+예산 절감률: 50.7%
 ```
 
 ---

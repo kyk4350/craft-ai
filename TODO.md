@@ -7,7 +7,7 @@
 - 프로젝트명: ContentCraft AI
 - 개발 기간: 7주
 - 현재 주차: 2주차
-- 기술 스택: FastAPI, React, PostgreSQL, Redis, Qdrant, Gemini API, 나노바나나
+- 기술 스택: FastAPI, React, PostgreSQL, Redis, Qdrant, Gemini API, Replicate
 
 ---
 
@@ -33,12 +33,13 @@
 - [x] Git 저장소 커밋 및 푸시
 - [x] API 키 발급
   - [x] Gemini API
-  - [x] Stability AI
   - [x] Supabase
   - [x] Upstash Redis
   - [x] Qdrant Cloud
+  - [ ] Replicate (3주차에 필요)
+  - [ ] Voyage AI (선택, 4주차)
 - [x] 클라우드 서비스 가입
-- [x] AI 모델 사용 전략 구현 (Mock, Stability, 나노바나나)
+- [x] AI 모델 사용 전략 구현 (Mock, Replicate - SDXL, Ideogram v3 Turbo)
 - [x] 백엔드 개발 환경 테스트
 - [x] API 키 발급 가이드 문서 작성
 
@@ -116,10 +117,11 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
 - [ ] 카피 길이 제한 및 검증
 - [ ] 카피 API 엔드포인트
 
-### 나노바나나 이미지 생성
-- [ ] 나노바나나 서비스 모듈 (`backend/app/services/nanobanana_service.py`)
+### Replicate 이미지 생성
+- [ ] Replicate 서비스 모듈 (`backend/app/services/replicate_service.py`)
 - [ ] 카피 → 이미지 프롬프트 변환 로직
-- [ ] Gemini 2.5 Flash Image API 연동
+- [ ] Replicate API 연동 (SDXL + Ideogram v3 Turbo)
+- [ ] 환경별 모델 분기 로직 (IMAGE_MODE)
 - [ ] 이미지 생성 및 저장
 - [ ] 이미지 스토리지 설정 (로컬 또는 클라우드)
 - [ ] 이미지 최적화 (크기, 포맷)
@@ -303,12 +305,14 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
 - [ ] 추천 API 엔드포인트
 - [ ] "이 스타일로 생성" 기능
 
-#### 옵션 4: 대화형 이미지 편집 (나노바나나)
+#### 옵션 4: 대화형 이미지 편집 ⭐ 추천 (Ideogram v2 Inpainting)
 - [ ] 이미지 편집 서비스 모듈
-- [ ] 자연어 편집 명령 처리
+- [ ] Gemini로 자연어 명령 분석
+- [ ] 마스크 생성 로직 (background/product/full)
+- [ ] Replicate Ideogram v2 Inpainting 연동
 - [ ] 멀티턴 대화 구현
 - [ ] 편집 히스토리 관리
-- [ ] 빠른 명령 버튼
+- [ ] 빠른 명령 버튼 4개 (배경 밝게, 제품 크게, 색감 따뜻하게, 조명 개선)
 - [ ] 편집 UI 컴포넌트
 
 #### 옵션 5: 브랜드 킷
@@ -405,7 +409,7 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
 
 ### 3주차 목표
 - [ ] Gemini API 연동 완료
-- [ ] 나노바나나 연동 완료
+- [ ] Replicate API 연동 완료 (SDXL, Ideogram v3 Turbo)
 - [ ] 콘텐츠 생성 API 작동 확인
 - [ ] 기본 UI에서 전체 플로우 테스트 성공
 
@@ -434,21 +438,30 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
 ## 참고 사항
 
 ### API 키 발급 필요
-- [ ] Google AI Studio (Gemini API)
-- [ ] Voyage AI
-- [ ] Supabase
-- [ ] Upstash Redis
-- [ ] Qdrant Cloud
+- [x] Google AI Studio (Gemini API)
+- [ ] Replicate (3주차에 필요)
+- [ ] Voyage AI (선택, 4주차)
+- [x] Supabase
+- [x] Upstash Redis
+- [x] Qdrant Cloud
 
-### 예상 비용
-- Gemini API: 약 5만원
-- 나노바나나: 약 2.5-5만원
-- Railway: 약 1.5만원
-- 총: 약 9-12만원
+### 예상 비용 (50,000원 예산)
+- Gemini API: 약 10,000원
+- Replicate API:
+  - 개발 단계 (SDXL): 4,800원
+  - 최종 발표 (Ideogram v3 Turbo): 2,650원
+  - 배포 후 (SDXL): 7,200원
+- Ideogram v2 편집 (부가 기능): 8,000원
+- 인프라 (Vercel, Render, Supabase 무료): 0원
+- **총 예산: 24,650원 (예비비: 25,350원)**
+- **예산 절감률: 50.7%**
 
 ### 중요 링크
 - Gemini API: https://ai.google.dev/gemini-api/docs
-- 나노바나나: https://ai.google.dev/gemini-api/docs/image-generation
+- Replicate: https://replicate.com/docs
+- SDXL on Replicate: https://replicate.com/stability-ai/sdxl
+- Ideogram v3 Turbo: https://replicate.com/ideogram-ai/ideogram-v3-turbo
+- Ideogram v2 (편집): https://replicate.com/ideogram-ai/ideogram-v2
 - FastAPI: https://fastapi.tiangolo.com/
 - React: https://react.dev/
 - Qdrant: https://qdrant.tech/documentation/
