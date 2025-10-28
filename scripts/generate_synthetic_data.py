@@ -141,8 +141,8 @@ async def generate_all_categories():
     for category, count in categories.items():
         logger.info(f"\n[{category}] 카테고리 처리 중...")
 
-        # 50개씩 나눠서 생성 (API 제한 고려)
-        batch_size = 50
+        # 10개씩 나눠서 생성 (JSON 응답 길이 제한 고려)
+        batch_size = 10
         category_profiles = []
 
         for i in range(0, count, batch_size):
