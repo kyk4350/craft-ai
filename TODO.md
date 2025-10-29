@@ -343,14 +343,21 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
 - [ ] "이 스타일로 생성" 기능
 
 #### 옵션 4: 대화형 이미지 편집 ⭐ 추천 (Ideogram v2 Inpainting)
-- [ ] 이미지 편집 서비스 모듈
-- [ ] Gemini로 자연어 명령 분석
+- [ ] 사용자 이미지 업로드 기능
+  - [ ] 이미지 업로드 API (`POST /api/content/upload-image`)
+  - [ ] multipart/form-data 파일 처리
+  - [ ] 업로드 이미지 저장 (로컬/S3)
+  - [ ] 이미지 파일 검증 (형식, 크기, 해상도)
+  - [ ] 업로드 UI 컴포넌트 (드래그 앤 드롭)
+- [ ] 이미지 편집 서비스 모듈 (`backend/app/services/image_edit_service.py`)
+- [ ] Gemini로 자연어 명령 분석 (편집 의도 파악)
 - [ ] 마스크 생성 로직 (background/product/full)
 - [ ] Replicate Ideogram v2 Inpainting 연동
-- [ ] 멀티턴 대화 구현
-- [ ] 편집 히스토리 관리
+- [ ] 편집 API (`POST /api/content/edit-image`)
+- [ ] 멀티턴 대화 구현 (편집 히스토리 기반 연속 편집)
+- [ ] 편집 히스토리 관리 (DB 저장)
 - [ ] 빠른 명령 버튼 4개 (배경 밝게, 제품 크게, 색감 따뜻하게, 조명 개선)
-- [ ] 편집 UI 컴포넌트
+- [ ] 편집 UI 컴포넌트 (편집 전/후 비교, 대화창)
 
 #### 옵션 5: 브랜드 킷
 - [ ] 브랜드 정보 모델
