@@ -8,15 +8,16 @@ python-dotenv>=1.0.0
 
 # AI API
 google-generativeai>=0.3.1
+replicate>=1.7.0
 
 # HTTP 클라이언트
 requests>=2.31.0
 httpx>=0.25.0
 
-# 데이터베이스 (2주차 이후 필요 시 설치)
-# sqlalchemy>=2.0.23
-# psycopg2-binary>=2.9.9
-# alembic>=1.12.1
+# 데이터베이스
+sqlalchemy>=2.0.23
+psycopg2-binary>=2.9.9
+alembic>=1.12.1
 
 # Redis (2주차 이후 필요 시 설치)
 # redis>=5.0.1
@@ -38,8 +39,9 @@ kaggle>=1.7.0
 pydantic>=2.5.0
 pydantic-settings>=2.1.0
 
-# 이미지 처리 (3주차 이후 필요 시 설치)
-# pillow>=10.1.0
+# 이미지 처리
+pillow>=10.1.0
 
 # 비동기 처리
-aiofiles>=23.2.1
+aiofiles==25.1.0
+aiohttp==3.13.2

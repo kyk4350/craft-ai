@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
+from pathlib import Path
 import os
 
 load_dotenv()
@@ -10,6 +12,11 @@ app = FastAPI(
     description="AI-powered marketing content generation platform",
     version="1.0.0"
 )
+
+# Static files 설정 (이미지 서빙)
+storage_dir = Path(__file__).parent.parent / "storage" / "images"
+storage_dir.mkdir(parents=True, exist_ok=True)
+app.mount("/static/images", StaticFiles(directory=str(storage_dir)), name="images")
 
 # CORS 설정
 app.add_middleware(

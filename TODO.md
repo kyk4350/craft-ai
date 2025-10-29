@@ -145,9 +145,23 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
 - [x] 이미지 생성 API 엔드포인트 (`POST /api/content/image`)
 - [x] 에러 핸들링 및 재시도 로직 (지수 백오프)
 - [x] 모델별 파라미터 자동 변환
-- [ ] 이미지 스토리지 설정 (로컬 또는 클라우드)
-- [ ] 이미지 최적화 (크기, 포맷)
-- [ ] 실제 이미지 생성 테스트 (Replicate 크레딧 필요)
+- [x] Replicate API 토큰 인증 (Client 명시적 전달)
+- [x] 이미지 스토리지 설정 (개발: 로컬)
+  - [x] ImageStorageService 구현 (`backend/app/services/image_storage.py`)
+  - [x] 이미지 다운로드 및 저장 (`aiohttp`, `aiofiles`)
+  - [x] FastAPI static files 마운트 (`/static/images/`)
+- [x] 이미지 최적화 (크기, 포맷)
+  - [x] PIL/Pillow로 이미지 최적화
+  - [x] RGBA → RGB 변환
+  - [x] 크기 조정 (최대 2048x2048, 비율 유지)
+  - [x] PNG 무손실 압축
+- [x] 실제 이미지 생성 + 저장 + 서빙 테스트 완료
+- [ ] 프로덕션 이미지 스토리지 (S3/CDN) - 5주차 또는 7주차 배포 시 구현
+  - [ ] AWS S3 또는 Cloudflare R2 설정
+  - [ ] 환경별 스토리지 분기 (개발: 로컬, 프로덕션: S3)
+  - [ ] S3 업로드 로직 추가
+  - [ ] CDN URL 반환
+  - [ ] 로컬 파일 저장 비활성화 (프로덕션)
 
 ### 콘텐츠 생성 통합
 - [ ] 전체 생성 파이프라인 구현

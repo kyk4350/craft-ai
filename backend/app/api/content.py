@@ -160,16 +160,17 @@ async def generate_image(request: ImageGenerationRequest):
     try:
         logger.info(f"이미지 생성 요청: {request.image_prompt[:50]}...")
 
-        image_url = await replicate_service.generate_image(
+        result = await replicate_service.generate_image(
             prompt=request.image_prompt,
             width=request.width,
-            height=request.height
+            height=request.height,
+            save_local=True  # 로컬에 저장
         )
 
         return ImageGenerationResponse(
             success=True,
-            data=image_url,
-            message="이미지 생성 완료"
+            data=result,
+            message="이미지 생성 및 저장 완료"
         )
 
     except Exception as e:

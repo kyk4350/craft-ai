@@ -4,10 +4,11 @@ Replicate API 서비스 모듈
 """
 
 import replicate
-from typing import Optional
+from typing import Optional, Dict
 import logging
 import time
 from app.config import settings
+from app.services.image_storage import image_storage
 
 logger = logging.getLogger(__name__)
 
@@ -17,9 +18,13 @@ class ReplicateService:
 
     def __init__(self):
         self.api_token = settings.REPLICATE_API_TOKEN
+        # Replicate Client 생성 (토큰 명시적 전달)
         if self.api_token:
-            # Replicate 클라이언트는 환경변수에서 자동으로 토큰을 읽음
-            pass
+            self.client = replicate.Client(api_token=self.api_token)
+            logger.info("Replicate API 클라이언트 초기화 완료")
+        else:
+            self.client = None
+            logger.warning("Replicate API 토큰이 설정되지 않았습니다")
 
     async def generate_image(
         self,
@@ -29,8 +34,9 @@ class ReplicateService:
         num_outputs: int = 1,
         guidance_scale: float = 7.5,
         num_inference_steps: int = 50,
-        max_retries: int = 3
-    ) -> Optional[str]:
+        max_retries: int = 3,
+        save_local: bool = True
+    ) -> Optional[Dict[str, str]]:
         """
         이미지 생성 (환경별 모델 자동 선택)
 
@@ -42,9 +48,14 @@ class ReplicateService:
             guidance_scale: 프롬프트 가이던스 강도
             num_inference_steps: 추론 스텝 수
             max_retries: 최대 재시도 횟수
+            save_local: 로컬에 저장 여부
 
         Returns:
-            생성된 이미지 URL (첫 번째 이미지)
+            {
+                "original_url": "Replicate 원본 URL",
+                "local_url": "로컬 저장된 이미지 URL (save_local=True인 경우)",
+                "file_path": "로컬 파일 경로 (save_local=True인 경우)"
+            }
         """
         # 환경별 모델 선택
         model = self._get_model()
@@ -68,13 +79,32 @@ class ReplicateService:
                 )
 
                 # Replicate API 호출
-                output = replicate.run(model, input=input_params)
+                output = self.client.run(model, input=input_params)
 
                 # 결과 처리
                 if isinstance(output, list) and len(output) > 0:
-                    image_url = output[0]
-                    logger.info(f"✓ 이미지 생성 완료: {image_url}")
-                    return image_url
+                    # FileOutput 객체를 문자열로 변환
+                    original_url = str(output[0])
+                    logger.info(f"✓ 이미지 생성 완료: {original_url}")
+
+                    result = {"original_url": original_url}
+
+                    # 로컬 저장
+                    if save_local:
+                        logger.info("로컬 스토리지에 이미지 저장 중...")
+                        storage_result = await image_storage.download_and_save(
+                            image_url=original_url,
+                            optimize=True
+                        )
+
+                        if storage_result:
+                            result["local_url"] = storage_result["public_url"]
+                            result["file_path"] = storage_result["file_path"]
+                            logger.info(f"✓ 로컬 저장 완료: {storage_result['public_url']}")
+                        else:
+                            logger.warning("로컬 저장 실패, 원본 URL만 반환")
+
+                    return result
                 else:
                     logger.warning(f"응답 형식 오류: {output}")
                     raise ValueError(f"예상치 못한 응답 형식: {type(output)}")
