@@ -240,6 +240,20 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
 - [ ] 히스토리 페이지 (`frontend/src/pages/History.jsx`)
 - [ ] 상세 모달 컴포넌트 (`frontend/src/components/DetailModal.jsx`)
 
+### 타겟 세분화 UI
+- [ ] 타겟 필터링 페이지 (`frontend/src/pages/TargetFilter.jsx`)
+  - [ ] 필터 옵션 UI (나이대, 성별, 소득, 관심사, 카테고리)
+  - [ ] 필터 결과 표시 (매칭된 타겟 수, 프로필 목록)
+  - [ ] 인사이트 자동 표시 (고충, 선호 채널, 톤앤매너, 메시지 전략)
+- [ ] 타겟 검색 컴포넌트 (`frontend/src/components/TargetSearch.jsx`)
+  - [ ] 키워드 검색
+  - [ ] 검색 결과 표시
+- [ ] 타겟 요약 대시보드 컴포넌트 (`frontend/src/components/TargetSummary.jsx`)
+  - [ ] 전체 타겟 분포 차트
+  - [ ] 주요 통계 카드
+- [ ] 세분화 → 콘텐츠 생성 연동
+  - [ ] 필터링된 타겟 정보를 콘텐츠 생성 폼에 자동 입력
+
 ### 백엔드 API 완성
 - [ ] 프로젝트 CRUD API
   - [ ] `POST /api/projects` - 생성
