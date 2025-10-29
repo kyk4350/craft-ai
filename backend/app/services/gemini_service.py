@@ -6,6 +6,8 @@ Gemini API 서비스 모듈
 import google.generativeai as genai
 from typing import Dict, List, Optional
 import logging
+import json
+import time
 from app.config import settings
 
 logger = logging.getLogger(__name__)
@@ -26,41 +28,55 @@ class GeminiService:
         self,
         prompt: str,
         temperature: float = 0.7,
-        max_tokens: Optional[int] = None
+        max_tokens: Optional[int] = None,
+        max_retries: int = 3
     ) -> str:
         """
-        텍스트 생성
+        텍스트 생성 (재시도 로직 포함)
 
         Args:
             prompt: 입력 프롬프트
             temperature: 창의성 조절 (0.0-1.0)
             max_tokens: 최대 토큰 수
+            max_retries: 최대 재시도 횟수
 
         Returns:
             생성된 텍스트
         """
-        try:
-            generation_config = {
-                "temperature": temperature,
-            }
-            if max_tokens:
-                generation_config["max_output_tokens"] = max_tokens
+        last_error = None
 
-            response = self.model.generate_content(
-                prompt,
-                generation_config=generation_config
-            )
+        for attempt in range(max_retries):
+            try:
+                generation_config = {
+                    "temperature": temperature,
+                }
+                if max_tokens:
+                    generation_config["max_output_tokens"] = max_tokens
 
-            # finish_reason 확인
-            if not response.parts:
-                logger.error(f"응답 없음. finish_reason: {response.candidates[0].finish_reason}")
-                raise Exception(f"텍스트 생성 실패: finish_reason={response.candidates[0].finish_reason}")
+                response = self.model.generate_content(
+                    prompt,
+                    generation_config=generation_config
+                )
 
-            return response.text
+                # finish_reason 확인
+                if not response.parts:
+                    logger.error(f"응답 없음. finish_reason: {response.candidates[0].finish_reason}")
+                    raise Exception(f"텍스트 생성 실패: finish_reason={response.candidates[0].finish_reason}")
 
-        except Exception as e:
-            logger.error(f"Gemini 텍스트 생성 실패: {str(e)}")
-            raise
+                return response.text
+
+            except Exception as e:
+                last_error = e
+                logger.warning(f"Gemini 텍스트 생성 시도 {attempt + 1}/{max_retries} 실패: {str(e)}")
+
+                if attempt < max_retries - 1:
+                    # 지수 백오프: 2초, 4초, 8초
+                    wait_time = 2 ** (attempt + 1)
+                    logger.info(f"{wait_time}초 후 재시도...")
+                    time.sleep(wait_time)
+
+        logger.error(f"Gemini 텍스트 생성 최종 실패 (재시도 {max_retries}회): {str(last_error)}")
+        raise last_error
 
     async def generate_marketing_strategies(
         self,
@@ -120,8 +136,21 @@ JSON만 출력해주세요.
 
         try:
             response_text = await self.generate_text(prompt, temperature=0.8)
-            # JSON 파싱 로직 추가 필요
-            return response_text
+
+            # JSON 파싱
+            parsed_data = self._parse_json_response(response_text)
+
+            if "strategies" not in parsed_data:
+                raise ValueError("응답에 'strategies' 키가 없습니다.")
+
+            strategies = parsed_data["strategies"]
+
+            # 검증: 3개의 전략이 있는지 확인
+            if len(strategies) != 3:
+                logger.warning(f"전략 개수가 3개가 아닙니다: {len(strategies)}개")
+
+            return strategies
+
         except Exception as e:
             logger.error(f"전략 생성 실패: {str(e)}")
             raise
@@ -185,8 +214,21 @@ JSON만 출력해주세요.
 
         try:
             response_text = await self.generate_text(prompt, temperature=0.9)
-            # JSON 파싱 로직 추가 필요
-            return response_text
+
+            # JSON 파싱
+            parsed_data = self._parse_json_response(response_text)
+
+            if "copies" not in parsed_data:
+                raise ValueError("응답에 'copies' 키가 없습니다.")
+
+            copies = parsed_data["copies"]
+
+            # 검증: 3개의 카피가 있는지 확인
+            if len(copies) != 3:
+                logger.warning(f"카피 개수가 3개가 아닙니다: {len(copies)}개")
+
+            return copies
+
         except Exception as e:
             logger.error(f"카피 생성 실패: {str(e)}")
             raise
@@ -232,6 +274,37 @@ JSON만 출력해주세요.
         except Exception as e:
             logger.error(f"이미지 프롬프트 변환 실패: {str(e)}")
             raise
+
+    def _parse_json_response(self, response_text: str) -> Dict:
+        """
+        Gemini 응답에서 JSON 추출 및 파싱
+
+        Args:
+            response_text: Gemini API 응답 텍스트
+
+        Returns:
+            파싱된 JSON 딕셔너리
+        """
+        # Gemini가 ```json ``` 으로 감쌀 수 있으므로 제거
+        cleaned_text = response_text.strip()
+
+        # 코드 블록 제거
+        if cleaned_text.startswith("```json"):
+            cleaned_text = cleaned_text[7:]
+        elif cleaned_text.startswith("```"):
+            cleaned_text = cleaned_text[3:]
+
+        if cleaned_text.endswith("```"):
+            cleaned_text = cleaned_text[:-3]
+
+        cleaned_text = cleaned_text.strip()
+
+        try:
+            return json.loads(cleaned_text)
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON 파싱 실패: {str(e)}")
+            logger.error(f"응답 내용 (처음 500자): {cleaned_text[:500]}")
+            raise ValueError(f"JSON 파싱 실패: {str(e)}")
 
 
 # 싱글톤 인스턴스
