@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from typing import Dict, Any
 import logging
 
-from app.database.connection import get_db
+from app.models.base import get_db
 from app.services.performance_service import PerformanceService
 
 router = APIRouter(prefix="/api/performance", tags=["Performance"])

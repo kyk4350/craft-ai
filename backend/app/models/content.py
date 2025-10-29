@@ -22,7 +22,7 @@ class Content(Base, TimestampMixin):
     __tablename__ = "contents"
 
     id = Column(Integer, primary_key=True, index=True)
-    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
+    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=True)  # 프로젝트 없이도 콘텐츠 생성 가능
 
     # 타겟 정보 (Target 모델과 직접 관계는 없고 필터링 조건만 저장)
     target_age_group = Column(String(50))

@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { FullContentGenerationResponse } from '../utils/api';
+import { FullContentGenerationResponse, performanceApi, PerformanceMetrics } from '../utils/api';
 import Toast from './Toast';
+import PerformanceDisplay from './PerformanceDisplay';
 
 interface ResultDisplayProps {
   result: FullContentGenerationResponse;
@@ -9,7 +10,42 @@ interface ResultDisplayProps {
 export default function ResultDisplay({ result }: ResultDisplayProps) {
   const [selectedStrategy, setSelectedStrategy] = useState<number>(result.data.selected_strategy_id);
   const [showToast, setShowToast] = useState(false);
+  const [showPerformance, setShowPerformance] = useState(false);
+  const [performanceData, setPerformanceData] = useState<PerformanceMetrics | null>(null);
+  const [isLoadingPerformance, setIsLoadingPerformance] = useState(false);
+  const [performanceError, setPerformanceError] = useState<string | null>(null);
+  const [isAiPrediction, setIsAiPrediction] = useState(false);
+  const [confidenceScore, setConfidenceScore] = useState<number | undefined>(undefined);
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
+  // 성과 예측 실행
+  const handlePredictPerformance = async () => {
+    if (!result.data.content_id) {
+      setPerformanceError('콘텐츠 ID가 없습니다. 데이터베이스 저장이 필요합니다.');
+      return;
+    }
+
+    setIsLoadingPerformance(true);
+    setPerformanceError(null);
+
+    try {
+      const response = await performanceApi.predictPerformance(result.data.content_id);
+
+      if (response.success && response.data.exists && response.data.metrics) {
+        setPerformanceData(response.data.metrics);
+        setIsAiPrediction(response.data.is_ai_prediction || false);
+        setConfidenceScore(response.data.confidence_score);
+        setShowPerformance(true);
+      } else {
+        setPerformanceError('성과 데이터를 불러올 수 없습니다.');
+      }
+    } catch (error) {
+      console.error('성과 예측 오류:', error);
+      setPerformanceError(error instanceof Error ? error.message : '성과 예측 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoadingPerformance(false);
+    }
+  };
 
   if (!result) return null;
 
@@ -140,6 +176,52 @@ export default function ResultDisplay({ result }: ResultDisplayProps) {
           </button>
         </div>
       </div>
+
+      {/* 성과 예측 섹션 */}
+      {result.data.content_id && (
+        <div className="bg-white rounded-lg shadow-md p-6">
+          {!showPerformance ? (
+            <div className="text-center">
+              <h3 className="text-xl font-bold text-gray-800 mb-3">📊 성과 분석</h3>
+              <p className="text-gray-600 mb-4">
+                AI가 가상 사용자 페르소나를 생성하여 이 콘텐츠의 예상 성과를 분석합니다.
+              </p>
+              <button
+                onClick={handlePredictPerformance}
+                disabled={isLoadingPerformance}
+                className={`py-3 px-6 rounded-lg font-medium transition-colors ${
+                  isLoadingPerformance
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700'
+                }`}
+              >
+                {isLoadingPerformance ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    성과 분석 중... (약 10-15초 소요)
+                  </span>
+                ) : (
+                  '성과 예측 보기'
+                )}
+              </button>
+              {performanceError && (
+                <p className="mt-3 text-red-600 text-sm">{performanceError}</p>
+              )}
+            </div>
+          ) : (
+            performanceData && (
+              <PerformanceDisplay
+                metrics={performanceData}
+                isAiPrediction={isAiPrediction}
+                confidenceScore={confidenceScore}
+              />
+            )
+          )}
+        </div>
+      )}
 
       {/* 다시 생성 버튼 */}
       <div className="flex justify-center">

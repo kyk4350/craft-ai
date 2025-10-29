@@ -237,28 +237,50 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
 
 ## 5주차: 기능 통합 및 서비스화
 
+### 사용자 인증 (JWT) - 우선 구현
+- [ ] User 모델 확인 및 수정 (필요시)
+- [ ] 회원가입 API (`POST /api/auth/register`)
+  - [ ] 이메일 중복 체크
+  - [ ] 비밀번호 해싱 (bcrypt)
+  - [ ] 사용자 생성
+- [ ] 로그인 API (`POST /api/auth/login`)
+  - [ ] 이메일/비밀번호 검증
+  - [ ] JWT 토큰 발급 (access token)
+  - [ ] Refresh token (선택)
+- [ ] 인증 미들웨어
+  - [ ] JWT 토큰 검증
+  - [ ] 현재 사용자 정보 추출
+  - [ ] Protected routes
+- [ ] 프론트엔드 인증
+  - [ ] 로그인 페이지 (`frontend/src/pages/Login.tsx`)
+  - [ ] 회원가입 페이지 (`frontend/src/pages/Register.tsx`)
+  - [ ] JWT 토큰 저장 (localStorage)
+  - [ ] Axios 인터셉터 (토큰 자동 추가)
+  - [ ] 로그아웃 기능
+  - [ ] Protected routes (React Router)
+
 ### React 프론트엔드 본격 개발
 - [ ] 라우팅 설정 (React Router)
 - [ ] 전역 상태 관리 (Zustand)
   - [ ] 프로젝트 스토어
   - [ ] 콘텐츠 스토어
   - [ ] 사용자 스토어
-- [ ] 메인 대시보드 페이지 (`frontend/src/pages/Dashboard.jsx`)
-- [ ] 프로젝트 목록 페이지 (`frontend/src/pages/Projects.jsx`)
-- [ ] 프로젝트 생성/수정 페이지 (`frontend/src/pages/ProjectForm.jsx`)
-- [ ] 콘텐츠 생성 페이지 (`frontend/src/pages/Generate.jsx`)
-- [ ] 히스토리 페이지 (`frontend/src/pages/History.jsx`)
-- [ ] 상세 모달 컴포넌트 (`frontend/src/components/DetailModal.jsx`)
+- [ ] 메인 대시보드 페이지 (`frontend/src/pages/Dashboard.tsx`)
+- [ ] 프로젝트 목록 페이지 (`frontend/src/pages/Projects.tsx`)
+- [ ] 프로젝트 생성/수정 페이지 (`frontend/src/pages/ProjectForm.tsx`)
+- [ ] 콘텐츠 생성 페이지 (`frontend/src/pages/Generate.tsx`)
+- [ ] 히스토리 페이지 (`frontend/src/pages/History.tsx`)
+- [ ] 상세 모달 컴포넌트 (`frontend/src/components/DetailModal.tsx`)
 
 ### 타겟 세분화 UI
-- [ ] 타겟 필터링 페이지 (`frontend/src/pages/TargetFilter.jsx`)
+- [ ] 타겟 필터링 페이지 (`frontend/src/pages/TargetFilter.tsx`)
   - [ ] 필터 옵션 UI (나이대, 성별, 소득, 관심사, 카테고리)
   - [ ] 필터 결과 표시 (매칭된 타겟 수, 프로필 목록)
   - [ ] 인사이트 자동 표시 (고충, 선호 채널, 톤앤매너, 메시지 전략)
-- [ ] 타겟 검색 컴포넌트 (`frontend/src/components/TargetSearch.jsx`)
+- [ ] 타겟 검색 컴포넌트 (`frontend/src/components/TargetSearch.tsx`)
   - [ ] 키워드 검색
   - [ ] 검색 결과 표시
-- [ ] 타겟 요약 대시보드 컴포넌트 (`frontend/src/components/TargetSummary.jsx`)
+- [ ] 타겟 요약 대시보드 컴포넌트 (`frontend/src/components/TargetSummary.tsx`)
   - [ ] 전체 타겟 분포 차트
   - [ ] 주요 통계 카드
 - [ ] 세분화 → 콘텐츠 생성 연동
@@ -493,7 +515,6 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
 - [ ] 콘텐츠 내보내기 (PDF, ZIP)
 - [ ] 협업 기능 (팀원 초대)
 - [ ] 알림 시스템
-- [ ] 사용자 인증 (JWT)
 
 ### 개발 환경
 - [ ] Docker Compose 설정

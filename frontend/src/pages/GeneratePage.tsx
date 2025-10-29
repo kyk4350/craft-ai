@@ -35,7 +35,7 @@ export default function GeneratePage() {
         target_gender: formData.target_gender,
         target_interests: formData.target_interests,
         copy_tone: formData.copy_tone,
-        save_to_db: false, // 3주차에는 DB 저장 안함 (히스토리 기능은 5주차)
+        save_to_db: true, // DB 저장 (성과 예측 기능을 위해 필요)
       });
 
       setResult(response);

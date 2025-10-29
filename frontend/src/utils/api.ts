@@ -30,6 +30,30 @@ export interface ImageData {
   file_path?: string;
 }
 
+// 성과 지표 타입
+export interface PerformanceMetrics {
+  impressions: number;
+  clicks: number;
+  ctr: number;
+  engagement_rate: number;
+  conversion_rate: number;
+  brand_recall_score: number;
+}
+
+// 성과 예측 응답
+export interface PerformanceResponse {
+  success: boolean;
+  message?: string;
+  data: {
+    exists: boolean;
+    data_source?: string;
+    metrics?: PerformanceMetrics;
+    confidence_score?: number;
+    is_ai_prediction?: boolean;
+  };
+  is_new_prediction?: boolean;
+}
+
 // 통합 콘텐츠 생성 요청
 export interface FullContentGenerationRequest {
   product_name: string;
@@ -185,6 +209,22 @@ export const segmentationApi = {
    */
   getInsights: async (params: Record<string, string>): Promise<unknown> => {
     return apiClient.get('/api/segmentation/insights', { params });
+  },
+};
+
+export const performanceApi = {
+  /**
+   * 콘텐츠 성과 예측
+   */
+  predictPerformance: async (contentId: number): Promise<PerformanceResponse> => {
+    return apiClient.post(`/api/performance/predict/${contentId}`);
+  },
+
+  /**
+   * 성과 데이터 조회
+   */
+  getPerformance: async (contentId: number): Promise<PerformanceResponse> => {
+    return apiClient.get(`/api/performance/${contentId}`);
   },
 };
 
