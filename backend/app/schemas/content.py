@@ -80,6 +80,22 @@ class ImagePromptResponse(BaseModel):
     message: str = Field("이미지 프롬프트 생성 완료", description="응답 메시지")
 
 
+# === 이미지 생성 ===
+
+class ImageGenerationRequest(BaseModel):
+    """이미지 생성 요청"""
+    image_prompt: str = Field(..., description="이미지 프롬프트 (영어)")
+    width: int = Field(1024, description="이미지 너비")
+    height: int = Field(1024, description="이미지 높이")
+
+
+class ImageGenerationResponse(BaseModel):
+    """이미지 생성 응답"""
+    success: bool = Field(True, description="성공 여부")
+    data: str = Field(..., description="생성된 이미지 URL")
+    message: str = Field("이미지 생성 완료", description="응답 메시지")
+
+
 # === 에러 응답 ===
 
 class ErrorResponse(BaseModel):

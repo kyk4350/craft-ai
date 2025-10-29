@@ -18,7 +18,8 @@ class Settings(BaseSettings):
     VOYAGE_AI_API_KEY: Optional[str] = None
 
     # AI 모델 설정
-    IMAGE_PROVIDER: str = "mock"  # mock, stability, nanobanana
+    IMAGE_PROVIDER: str = "replicate"  # replicate (SDXL, Ideogram)
+    IMAGE_MODE: str = "development"  # development (SDXL), production (Ideogram v3 Turbo)
     GEMINI_MODEL: str = "gemini-2.5-flash"  # gemini-2.5-flash, gemini-2.5-pro
 
     # 데이터베이스

@@ -7,9 +7,11 @@ from app.schemas.content import (
     StrategyRequest, StrategyResponse,
     CopyRequest, CopyResponse,
     ImagePromptRequest, ImagePromptResponse,
+    ImageGenerationRequest, ImageGenerationResponse,
     ErrorResponse, Strategy, Copy
 )
 from app.services.gemini_service import gemini_service
+from app.services.replicate_service import replicate_service
 import logging
 
 logger = logging.getLogger(__name__)
@@ -138,4 +140,41 @@ async def generate_image_prompt(request: ImagePromptRequest):
         raise HTTPException(
             status_code=500,
             detail=f"이미지 프롬프트 생성 중 오류가 발생했습니다: {str(e)}"
+        )
+
+
+@router.post(
+    "/image",
+    response_model=ImageGenerationResponse,
+    summary="이미지 생성",
+    description="Replicate API를 사용하여 이미지를 생성합니다 (SDXL 또는 Ideogram v3 Turbo)"
+)
+async def generate_image(request: ImageGenerationRequest):
+    """
+    이미지 생성
+
+    환경별 모델 자동 선택:
+    - **개발 모드**: SDXL (빠르고 저렴)
+    - **프로덕션**: Ideogram v3 Turbo (고품질)
+    """
+    try:
+        logger.info(f"이미지 생성 요청: {request.image_prompt[:50]}...")
+
+        image_url = await replicate_service.generate_image(
+            prompt=request.image_prompt,
+            width=request.width,
+            height=request.height
+        )
+
+        return ImageGenerationResponse(
+            success=True,
+            data=image_url,
+            message="이미지 생성 완료"
+        )
+
+    except Exception as e:
+        logger.error(f"이미지 생성 실패: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"이미지 생성 중 오류가 발생했습니다: {str(e)}"
         )
