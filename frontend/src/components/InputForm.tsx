@@ -264,7 +264,13 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
               type="text"
               value={customInterest}
               onChange={(e) => setCustomInterest(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomInterest())}
+              onKeyDown={(e) => {
+                // 한글 입력 중(composing)일 때는 무시
+                if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                  e.preventDefault();
+                  handleAddCustomInterest();
+                }
+              }}
               placeholder="직접 입력..."
               className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={isLoading}
