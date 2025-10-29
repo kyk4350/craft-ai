@@ -97,42 +97,45 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
 - [x] 실제 사용자 시나리오 10개 테스트 완료 (test_real_scenarios.py)
 
 ### 데이터베이스 설정
-- [ ] PostgreSQL (Supabase) 데이터베이스 생성
-- [ ] Alembic 마이그레이션 설정
-- [ ] 데이터베이스 모델 정의
-  - [ ] User 모델 (`backend/app/models/user.py`)
-  - [ ] Project 모델 (`backend/app/models/project.py`)
-  - [ ] Target 모델 (`backend/app/models/target.py`)
-  - [ ] Segment 모델 (`backend/app/models/segment.py`)
-- [ ] 초기 마이그레이션 생성 및 실행
-- [ ] 세분화 데이터 데이터베이스 임포트
+- [x] PostgreSQL (Supabase) 데이터베이스 생성
+- [x] Alembic 마이그레이션 설정
+- [x] 데이터베이스 모델 정의
+  - [x] User 모델 (`backend/app/models/user.py`)
+  - [x] Project 모델 (`backend/app/models/project.py`)
+  - [x] Target 모델 (`backend/app/models/target.py`)
+  - [x] Content 모델 (`backend/app/models/content.py`)
+  - [x] Segment 모델 (`backend/app/models/segment.py`) - 필터 결과 캐싱용
+- [x] 초기 마이그레이션 생성 및 실행
+- [x] 타겟 프로필 데이터베이스 임포트 (990개, 10대 성별 분포 개선)
 
 ---
 
 ## 3주차: 맞춤형 콘텐츠 생성
 
 ### Gemini API 통합
-- [ ] Gemini 서비스 모듈 구현 (`backend/app/services/gemini_service.py`)
-- [ ] API 호출 에러 핸들링
+- [x] Gemini 서비스 모듈 구현 (`backend/app/services/gemini_service.py`)
+- [x] API 호출 에러 핸들링 (재시도 로직, 지수 백오프)
+- [x] JSON 파싱 로직 완성
 - [ ] 응답 캐싱 (Redis)
 - [ ] Rate limiting 구현
 
 ### 마케팅 전략 제안
-- [ ] 전략 제안 프롬프트 엔지니어링
-- [ ] 제품/타겟 정보 기반 전략 생성 로직
-- [ ] 3가지 전략 생성 (감성적, 기능적, 사회적)
-- [ ] 전략 API 엔드포인트 (`POST /api/generate/strategy`)
-- [ ] 전략 응답 스키마 정의 (`backend/app/schemas/strategy.py`)
+- [x] 전략 제안 프롬프트 엔지니어링
+- [x] 제품/타겟 정보 기반 전략 생성 로직
+- [x] 3가지 전략 생성 (감성적, 이성적, 사회적)
+- [x] 전략 API 엔드포인트 (`POST /api/content/strategy`)
+- [x] 전략 응답 스키마 정의 (`backend/app/schemas/content.py`)
 
 ### 텍스트 카피 생성
-- [ ] 카피 생성 프롬프트 엔지니어링
-  - [ ] 프로페셔널 톤
-  - [ ] 캐주얼 톤
-  - [ ] 임팩트 톤
-- [ ] 카피 생성 로직 구현
-- [ ] 해시태그 자동 생성
-- [ ] 카피 길이 제한 및 검증
-- [ ] 카피 API 엔드포인트
+- [x] 카피 생성 프롬프트 엔지니어링
+  - [x] 프로페셔널 톤 (40-50자)
+  - [x] 캐주얼 톤 (30-40자)
+  - [x] 임팩트 톤 (15-25자)
+- [x] 카피 생성 로직 구현
+- [x] 해시태그 자동 생성
+- [x] 카피 길이 제한 및 검증
+- [x] 카피 API 엔드포인트 (`POST /api/content/copy`)
+- [x] 이미지 프롬프트 변환 API (`POST /api/content/image-prompt`)
 
 ### Replicate 이미지 생성
 - [ ] Replicate 서비스 모듈 (`backend/app/services/replicate_service.py`)
