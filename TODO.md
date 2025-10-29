@@ -6,8 +6,9 @@
 
 - 프로젝트명: ContentCraft AI
 - 개발 기간: 7주
-- 현재 주차: 2주차
+- 현재 주차: 3주차
 - 기술 스택: FastAPI, React, PostgreSQL, Redis, Qdrant, Gemini API, Replicate
+- 배포: Vercel (프론트엔드) + Render (백엔드)
 
 ---
 
@@ -384,14 +385,22 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
 - [ ] 도메인 연결 (선택)
 - [ ] 배포 확인
 
-#### Railway (백엔드)
-- [ ] Railway 프로젝트 생성
-- [ ] Dockerfile 작성
+#### Render (백엔드)
+- [ ] Render 계정 생성
+- [ ] Web Service 생성
 - [ ] GitHub 저장소 연동
+- [ ] 빌드 설정 (Python 3.11+)
+- [ ] Start Command 설정 (`uvicorn app.main:app --host 0.0.0.0 --port $PORT`)
 - [ ] 환경 변수 설정
+  - [ ] DATABASE_URL (Supabase)
+  - [ ] REDIS_URL (Upstash)
+  - [ ] QDRANT_URL, QDRANT_API_KEY
+  - [ ] GEMINI_API_KEY
+  - [ ] REPLICATE_API_TOKEN
+  - [ ] 기타 설정 변수
 - [ ] 데이터베이스 연결 확인
-- [ ] 헬스체크 설정
-- [ ] 배포 확인
+- [ ] 헬스체크 엔드포인트 설정 (`/health`)
+- [ ] 배포 확인 및 테스트
 
 #### 데이터베이스 설정
 - [ ] Supabase PostgreSQL 프로덕션 설정
@@ -490,7 +499,7 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
 
 ### API 키 발급 필요
 - [x] Google AI Studio (Gemini API)
-- [ ] Replicate (3주차에 필요)
+- [x] Replicate (3주차 완료)
 - [ ] Voyage AI (선택, 4주차)
 - [x] Supabase
 - [x] Upstash Redis
@@ -522,13 +531,13 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
 ## 마일스톤
 
 - [x] Week 1 Complete: 환경 설정 완료
-- [ ] Week 2 Complete: 데이터 세분화 완료
-- [ ] Week 3 Complete: 콘텐츠 생성 기능 완료
+- [x] Week 2 Complete: 데이터 세분화 완료
+- [ ] Week 3 Complete: 콘텐츠 생성 기능 완료 (진행 중)
 - [ ] Week 4 Complete: 성과 분석 완료
 - [ ] Week 5 Complete: 서비스 통합 완료
 - [ ] Week 6 Complete: 품질 개선 완료
-- [ ] Week 7 Complete: 배포 및 발표 준비 완료
+- [ ] Week 7 Complete: 배포 및 발표 준비 완료 (Vercel + Render)
 
 ---
 
-현재 진행 상황: 1주차 완료, 2주차 시작 준비
+현재 진행 상황: 2주차 완료, 3주차 진행 중 (이미지 생성 및 스토리지 완료)
