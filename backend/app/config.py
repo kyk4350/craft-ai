@@ -13,6 +13,7 @@ class Settings(BaseSettings):
 
     # API Keys
     GEMINI_API_KEY: Optional[str] = None
+    REPLICATE_API_TOKEN: Optional[str] = None
     STABILITY_API_KEY: Optional[str] = None
     VOYAGE_AI_API_KEY: Optional[str] = None
 

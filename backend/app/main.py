@@ -33,11 +33,11 @@ async def health_check():
     return {"status": "healthy"}
 
 # API 라우터 등록
-from app.api import segmentation
+from app.api import segmentation, content
 
 app.include_router(segmentation.router)
+app.include_router(content.router)
 
 # TODO: 추후 추가 예정
-# from app.api import generation, analysis
-# app.include_router(generation.router)
+# from app.api import analysis
 # app.include_router(analysis.router)
