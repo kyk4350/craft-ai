@@ -126,8 +126,11 @@ export default function ResultDisplay({ result }: ResultDisplayProps) {
           </a>
           <button
             onClick={() => {
-              navigator.clipboard.writeText(copy.text);
-              alert('카피가 클립보드에 복사되었습니다!');
+              const copyWithHashtags = copy.hashtags && copy.hashtags.length > 0
+                ? `${copy.text}\n\n${copy.hashtags.join(' ')}`
+                : copy.text;
+              navigator.clipboard.writeText(copyWithHashtags);
+              alert('카피와 해시태그가 클립보드에 복사되었습니다!');
             }}
             className="flex-1 py-2 px-4 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
           >
