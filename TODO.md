@@ -159,13 +159,15 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
 - [x] 실제 이미지 생성 + 저장 + 서빙 테스트 완료
 
 ### 콘텐츠 생성 통합
-- [ ] 전체 생성 파이프라인 구현
-  - [ ] 입력 → 전략 → 카피 → 이미지 프롬프트 → 이미지
-- [ ] 비동기 처리 구현
-- [ ] 에러 처리 및 재시도 로직
-- [ ] 진행 상황 추적
-- [ ] Content 모델 및 API (`backend/app/models/content.py`)
-- [ ] 생성 결과 데이터베이스 저장
+- [x] 전체 생성 파이프라인 구현
+  - [x] 입력 → 전략 → 카피 → 이미지 프롬프트 → 이미지
+- [x] 비동기 처리 구현
+- [x] 에러 처리 및 재시도 로직
+- [x] 진행 상황 추적 (로깅)
+- [x] Content 모델 및 API (`backend/app/models/content.py`)
+- [x] 생성 결과 데이터베이스 저장
+- [x] 통합 콘텐츠 생성 API (`POST /api/content/generate`)
+- [x] 통합 테스트 완료 (소요 시간: 37초)
 
 ### 프론트엔드 기본 UI
 - [ ] API 클라이언트 설정 (`frontend/src/utils/api.js`)
@@ -468,10 +470,10 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
 - [ ] 세분화 API 작동 확인
 
 ### 3주차 목표
-- [ ] Gemini API 연동 완료
-- [ ] Replicate API 연동 완료 (SDXL, Ideogram v3 Turbo)
-- [ ] 콘텐츠 생성 API 작동 확인
-- [ ] 기본 UI에서 전체 플로우 테스트 성공
+- [x] Gemini API 연동 완료
+- [x] Replicate API 연동 완료 (SDXL, Ideogram v3 Turbo)
+- [x] 콘텐츠 생성 API 작동 확인
+- [ ] 기본 UI에서 전체 플로우 테스트 성공 (진행 예정)
 
 ### 4주차 목표
 - [ ] 성과 분석 시스템 작동
@@ -540,4 +542,4 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
 
 ---
 
-현재 진행 상황: 2주차 완료, 3주차 진행 중 (이미지 생성 및 스토리지 완료)
+현재 진행 상황: 2주차 완료, 3주차 백엔드 완료 (통합 콘텐츠 생성 API 완료), 프론트엔드 UI 구현 필요
