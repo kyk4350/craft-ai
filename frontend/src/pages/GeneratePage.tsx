@@ -3,14 +3,24 @@ import InputForm from '../components/InputForm';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 import ResultDisplay from '../components/ResultDisplay';
-import { contentApi } from '../utils/api';
+import { contentApi, FullContentGenerationRequest, FullContentGenerationResponse } from '../utils/api';
+
+interface FormData {
+  product_name: string;
+  product_description: string;
+  category: string;
+  target_age: string;
+  target_gender: string;
+  target_interests: string[];
+  copy_tone: string;
+}
 
 export default function GeneratePage() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [result, setResult] = useState(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<FullContentGenerationResponse | null>(null);
 
-  const handleSubmit = async (formData) => {
+  const handleSubmit = async (formData: FormData) => {
     setIsLoading(true);
     setError(null);
     setResult(null);
@@ -30,7 +40,8 @@ export default function GeneratePage() {
 
       setResult(response);
     } catch (err) {
-      setError(err.message || '콘텐츠 생성에 실패했습니다.');
+      const errorMessage = err instanceof Error ? err.message : '콘텐츠 생성에 실패했습니다.';
+      setError(errorMessage);
       console.error('Content generation error:', err);
     } finally {
       setIsLoading(false);

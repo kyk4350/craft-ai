@@ -1,4 +1,16 @@
-export default function LoadingSpinner({ message = '생성 중...', progress = null }) {
+interface Progress {
+  current: string;
+  total: string;
+  value: number;
+  max: number;
+}
+
+interface LoadingSpinnerProps {
+  message?: string;
+  progress?: Progress | null;
+}
+
+export default function LoadingSpinner({ message = '생성 중...', progress = null }: LoadingSpinnerProps) {
   return (
     <div className="flex flex-col items-center justify-center p-8 bg-white rounded-lg shadow-md">
       {/* 스피너 */}

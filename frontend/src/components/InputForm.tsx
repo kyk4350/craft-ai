@@ -1,4 +1,19 @@
-import { useState } from 'react';
+import { useState, ChangeEvent, FormEvent } from 'react';
+
+interface FormData {
+  product_name: string;
+  product_description: string;
+  category: string;
+  target_age: string;
+  target_gender: string;
+  target_interests: string[];
+  copy_tone: string;
+}
+
+interface InputFormProps {
+  onSubmit: (formData: FormData) => void;
+  isLoading: boolean;
+}
 
 const CATEGORIES = [
   { value: 'beauty', label: '화장품/뷰티' },
@@ -35,25 +50,25 @@ const COMMON_INTERESTS = [
   '재테크', '자기계발', '공부', '취미', '스포츠', '문화생활'
 ];
 
-export default function InputForm({ onSubmit, isLoading }) {
-  const [formData, setFormData] = useState({
+export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
+  const [formData, setFormData] = useState<FormData>({
     product_name: '',
     product_description: '',
     category: 'beauty',
     target_age: '20-29',
     target_gender: '여성',
-    target_interests: [],
+    target_interests: [] as string[],
     copy_tone: 'professional',
   });
 
-  const [customInterest, setCustomInterest] = useState('');
+  const [customInterest, setCustomInterest] = useState<string>('');
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleInterestToggle = (interest) => {
+  const handleInterestToggle = (interest: string) => {
     setFormData(prev => ({
       ...prev,
       target_interests: prev.target_interests.includes(interest)
@@ -72,14 +87,14 @@ export default function InputForm({ onSubmit, isLoading }) {
     }
   };
 
-  const handleRemoveInterest = (interest) => {
+  const handleRemoveInterest = (interest: string) => {
     setFormData(prev => ({
       ...prev,
       target_interests: prev.target_interests.filter(i => i !== interest)
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // 유효성 검사
@@ -249,7 +264,7 @@ export default function InputForm({ onSubmit, isLoading }) {
               type="text"
               value={customInterest}
               onChange={(e) => setCustomInterest(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomInterest())}
+              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomInterest())}
               placeholder="직접 입력..."
               className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={isLoading}

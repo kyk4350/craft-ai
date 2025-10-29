@@ -1,5 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import GeneratePage from './pages/GeneratePage'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import GeneratePage from './pages/GeneratePage';
 
 function App() {
   return (
@@ -9,7 +9,7 @@ function App() {
         {/* 추가 라우트는 5주차에 구현 (Dashboard, Projects, History 등) */}
       </Routes>
     </Router>
-  )
+  );
 }
 
-export default App
+export default App;

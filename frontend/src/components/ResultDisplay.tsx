@@ -1,7 +1,12 @@
 import { useState } from 'react';
+import { FullContentGenerationResponse } from '../utils/api';
 
-export default function ResultDisplay({ result }) {
-  const [selectedStrategy, setSelectedStrategy] = useState(result.selected_strategy_id);
+interface ResultDisplayProps {
+  result: FullContentGenerationResponse;
+}
+
+export default function ResultDisplay({ result }: ResultDisplayProps) {
+  const [selectedStrategy, setSelectedStrategy] = useState<number>(result.data.selected_strategy_id);
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
   if (!result) return null;
@@ -91,7 +96,8 @@ export default function ResultDisplay({ result }) {
               className="w-full h-full object-contain"
               onError={(e) => {
                 // 로컬 이미지 로드 실패 시 원본 URL 사용
-                e.target.src = image.original_url;
+                const target = e.target as HTMLImageElement;
+                target.src = image.original_url;
               }}
             />
           ) : (
