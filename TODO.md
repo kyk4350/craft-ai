@@ -138,13 +138,16 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
 - [x] 이미지 프롬프트 변환 API (`POST /api/content/image-prompt`)
 
 ### Replicate 이미지 생성
-- [ ] Replicate 서비스 모듈 (`backend/app/services/replicate_service.py`)
-- [ ] 카피 → 이미지 프롬프트 변환 로직
-- [ ] Replicate API 연동 (SDXL + Ideogram v3 Turbo)
-- [ ] 환경별 모델 분기 로직 (IMAGE_MODE)
-- [ ] 이미지 생성 및 저장
+- [x] Replicate 서비스 모듈 (`backend/app/services/replicate_service.py`)
+- [x] 카피 → 이미지 프롬프트 변환 로직 (Gemini API)
+- [x] Replicate API 연동 (SDXL + Ideogram v3 Turbo)
+- [x] 환경별 모델 분기 로직 (IMAGE_MODE: development/production)
+- [x] 이미지 생성 API 엔드포인트 (`POST /api/content/image`)
+- [x] 에러 핸들링 및 재시도 로직 (지수 백오프)
+- [x] 모델별 파라미터 자동 변환
 - [ ] 이미지 스토리지 설정 (로컬 또는 클라우드)
 - [ ] 이미지 최적화 (크기, 포맷)
+- [ ] 실제 이미지 생성 테스트 (Replicate 크레딧 필요)
 
 ### 콘텐츠 생성 통합
 - [ ] 전체 생성 파이프라인 구현
