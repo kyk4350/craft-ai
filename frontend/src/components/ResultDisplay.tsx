@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { FullContentGenerationResponse } from '../utils/api';
+import Toast from './Toast';
 
 interface ResultDisplayProps {
   result: FullContentGenerationResponse;
@@ -7,6 +8,7 @@ interface ResultDisplayProps {
 
 export default function ResultDisplay({ result }: ResultDisplayProps) {
   const [selectedStrategy, setSelectedStrategy] = useState<number>(result.data.selected_strategy_id);
+  const [showToast, setShowToast] = useState(false);
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
   if (!result) return null;
@@ -130,7 +132,7 @@ export default function ResultDisplay({ result }: ResultDisplayProps) {
                 ? `${copy.text}\n\n${copy.hashtags.join(' ')}`
                 : copy.text;
               navigator.clipboard.writeText(copyWithHashtags);
-              alert('카피와 해시태그가 클립보드에 복사되었습니다!');
+              setShowToast(true);
             }}
             className="flex-1 py-2 px-4 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
           >
@@ -148,6 +150,14 @@ export default function ResultDisplay({ result }: ResultDisplayProps) {
           새로운 콘텐츠 생성하기
         </button>
       </div>
+
+      {/* 토스트 메시지 */}
+      {showToast && (
+        <Toast
+          message="카피와 해시태그가 복사되었습니다!"
+          onClose={() => setShowToast(false)}
+        />
+      )}
     </div>
   );
 }
