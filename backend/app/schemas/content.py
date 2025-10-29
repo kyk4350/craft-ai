@@ -104,3 +104,63 @@ class ErrorResponse(BaseModel):
     data: Optional[dict] = Field(None, description="데이터")
     message: str = Field(..., description="에러 메시지")
     error: str = Field(..., description="에러 상세")
+
+
+# ============================================
+# 통합 콘텐츠 생성 API
+# ============================================
+
+class FullContentGenerationRequest(BaseModel):
+    """전체 콘텐츠 생성 요청"""
+    # 제품 정보
+    product_name: str = Field(..., description="제품명")
+    product_description: str = Field(..., description="제품 설명")
+    category: str = Field(..., description="카테고리 (화장품/식품/패션/전자제품/서비스)")
+
+    # 타겟 정보
+    target_age: str = Field(..., description="타겟 나이대 (10대/20대/30대/40대/50대/60대 이상)")
+    target_gender: str = Field(..., description="타겟 성별 (남성/여성/무관)")
+    target_interests: List[str] = Field(..., description="타겟 관심사")
+    target_income_level: Optional[str] = Field(None, description="소득 수준 (저소득/중소득/중상소득/고소득)")
+
+    # 생성 옵션
+    strategy_id: Optional[int] = Field(None, description="선택한 전략 ID (1-3). None이면 자동 선택")
+    copy_tone: Optional[str] = Field("professional", description="카피 톤 (professional/casual/impact)")
+
+    # 프로젝트 정보 (옵션)
+    project_id: Optional[int] = Field(None, description="프로젝트 ID (저장 시 필요)")
+    save_to_db: bool = Field(True, description="데이터베이스에 저장 여부")
+
+
+class FullContentGenerationResponse(BaseModel):
+    """전체 콘텐츠 생성 응답"""
+    success: bool = Field(True, description="성공 여부")
+    data: dict = Field(..., description="생성된 콘텐츠")
+    message: str = Field("콘텐츠 생성 완료", description="응답 메시지")
+    generation_time: int = Field(..., description="총 생성 시간 (초)")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "success": True,
+                "data": {
+                    "content_id": 123,
+                    "strategies": [
+                        {"id": 1, "name": "감성적 접근", "core_message": "..."}
+                    ],
+                    "selected_strategy_id": 1,
+                    "copy": {
+                        "text": "피부가 달라지는 비타민C 세럼",
+                        "tone": "professional",
+                        "hashtags": ["#비타민C", "#세럼"]
+                    },
+                    "image": {
+                        "prompt": "Vitamin C serum bottle...",
+                        "url": "https://replicate.delivery/...",
+                        "local_url": "/static/images/..."
+                    }
+                },
+                "message": "콘텐츠 생성 완료",
+                "generation_time": 35
+            }
+        }
