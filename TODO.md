@@ -37,7 +37,7 @@
   - [x] Supabase
   - [x] Upstash Redis
   - [x] Qdrant Cloud
-  - [ ] Replicate (3주차에 필요)
+  - [x] Replicate (3주차에 필요)
   - [ ] Voyage AI (선택, 4주차)
 - [x] 클라우드 서비스 가입
 - [x] AI 모델 사용 전략 구현 (Mock, Replicate - SDXL, Ideogram v3 Turbo)
@@ -155,8 +155,18 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
   - [x] PIL/Pillow로 이미지 최적화
   - [x] RGBA → RGB 변환
   - [x] 크기 조정 (최대 2048x2048, 비율 유지)
-  - [x] PNG 무손실 압축
+  - [x] PNG 무손실 압징
 - [x] 실제 이미지 생성 + 저장 + 서빙 테스트 완료
+
+### Nano Banana (Gemini 2.5 Flash Image) 연동
+- [x] google-genai 패키지 설치
+- [x] Nano Banana 서비스 모듈 구현 (`backend/app/services/nanobanana_service.py`)
+- [x] IMAGE_PROVIDER 환경변수 시스템 구축
+  - [x] .env에서 replicate/nanobanana 전환 가능
+  - [x] content_generation.py에서 자동 분기
+- [x] 코드 일관성 개선 (os.getenv → settings 통일)
+- [ ] Gemini API Tier 1 결제 버그 해결 대기 (12시간 후 재시도 예정)
+- [ ] Nano Banana 실제 이미지 생성 테스트
 
 ### 콘텐츠 생성 통합
 - [x] 전체 생성 파이프라인 구현
@@ -192,46 +202,45 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
 ## 4주차: 캠페인 성과 분석
 
 ### 가상 사용자 반응 데이터
-- [ ] 페르소나 생성 프롬프트 작성
-- [ ] Gemini API로 다양한 페르소나 생성
-- [ ] 페르소나별 콘텐츠 반응 시뮬레이션
-- [ ] 성과 지표 데이터 생성
-  - [ ] CTR (클릭률)
-  - [ ] Engagement (참여도)
-  - [ ] Conversion (전환율)
-  - [ ] Brand Recall (브랜드 기억도)
+- [x] 페르소나 생성 프롬프트 작성
+- [x] Gemini API로 다양한 페르소나 생성
+- [x] 페르소나별 콘텐츠 반응 시뮬레이션
+- [x] 성과 지표 데이터 생성
+  - [x] CTR (클릭률)
+  - [x] Engagement (참여도)
+  - [x] Conversion (전환율)
+  - [x] Brand Recall (브랜드 기억도)
 
 ### 성과 분석 로직
-- [ ] 성과 분석 서비스 모듈 (`backend/app/services/analysis_service.py`)
-- [ ] 통계 집계 로직
-- [ ] 타겟별 성과 비교
-- [ ] 전략별 성과 비교
-- [ ] 시계열 분석
-- [ ] AI 기반 인사이트 생성
+- [x] 성과 분석 서비스 모듈 (`backend/app/services/performance_service.py`)
+- [x] Performance 모델 구현 (`backend/app/models/performance.py`)
+  - [x] AI 시뮬레이션 데이터 저장
+  - [x] 실제 데이터 추적 지원 (data_source 필드)
+  - [x] 페르소나 데이터 및 신뢰도 점수
+- [x] 통계 집계 로직
+- [x] 타겟별 성과 비교 (target_breakdown)
+- [x] AI 기반 인사이트 생성 (Gemini 2.0 Flash)
+- [x] 성과 예측 API 구현
+  - [x] `POST /api/performance/predict/{content_id}` - 성과 예측
+  - [x] `GET /api/performance/{content_id}` - 성과 조회
+  - [x] `GET /api/performance/summary/{content_id}` - 요약 조회
 
 ### Vector DB 통합
-- [ ] Qdrant Cloud 설정
+- [x] Qdrant Cloud 계정 생성 및 API 키 발급
+- [ ] Qdrant 연결 설정 및 테스트
 - [ ] Vector 서비스 모듈 (`backend/app/services/vector_service.py`)
 - [ ] Voyage AI 임베딩 연동
 - [ ] 콘텐츠 임베딩 생성 및 저장
 - [ ] 유사 콘텐츠 검색 기능
 - [ ] 과거 성과 데이터 참조 로직
 
-### Streamlit 대시보드
-- [ ] Streamlit 설치 및 설정
-- [ ] 대시보드 레이아웃 구성
-- [ ] 주요 지표 카드
-- [ ] 시계열 그래프 (Plotly)
-- [ ] 타겟별 비교 차트
+### 대시보드 (프론트엔드)
+- [ ] 대시보드 페이지 구현 (`frontend/src/pages/Dashboard.tsx`)
+- [ ] 주요 지표 카드 컴포넌트
+- [ ] 타겟별 비교 차트 (Chart.js 또는 Recharts)
 - [ ] 전략별 비교 차트
-- [ ] AI 인사이트 텍스트
-- [ ] 대시보드 실행 스크립트
-
-### 성과 예측 API
-- [ ] 예측 로직 구현
-- [ ] 예측 API 엔드포인트 (`POST /api/analysis/performance`)
-- [ ] 대시보드 데이터 API (`GET /api/analysis/dashboard`)
-- [ ] 예측 결과 스키마
+- [ ] AI 인사이트 텍스트 표시
+- [ ] 성과 예측 요청 및 표시 로직
 
 ---
 

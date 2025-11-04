@@ -6,18 +6,17 @@ import logging
 from typing import Dict, Any, List, Optional
 from sqlalchemy.orm import Session
 import google.generativeai as genai
-import os
 import json
 import asyncio
 
 from app.models.performance import Performance, DataSource
 from app.models.content import Content
+from app.config import settings
 
 logger = logging.getLogger(__name__)
 
 # Gemini API 설정
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-genai.configure(api_key=GEMINI_API_KEY)
+genai.configure(api_key=settings.GEMINI_API_KEY)
 
 
 class PerformanceService:
@@ -191,7 +190,7 @@ class PerformanceService:
             content_data = {
                 "product_name": content.project.product_name if content.project else "제품",
                 "product_description": content.project.product_description if content.project else "",
-                "strategy": content.strategy[0] if content.strategy else {},
+                "strategy": content.strategy if isinstance(content.strategy, dict) else {},
                 "copy_text": content.copy_text,
                 "hashtags": content.hashtags or [],
                 "image_prompt": content.image_prompt

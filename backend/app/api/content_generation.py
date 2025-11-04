@@ -13,9 +13,11 @@ from app.schemas.content import (
     FullContentGenerationResponse
 )
 from app.services.gemini_service import gemini_service
+from app.services.nanobanana_service import nanobanana_service
 from app.services.replicate_service import replicate_service
 from app.models.content import Content, ContentStatus
 from app.models.base import get_db
+from app.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -108,14 +110,31 @@ async def generate_full_content(
 
         # === 4단계: 이미지 생성 ===
         logger.info("4/4 이미지 생성 중...")
-        image_result = await replicate_service.generate_image(
-            prompt=image_prompt,
-            width=1024,
-            height=1024,
-            save_local=True
-        )
 
-        logger.info(f"✓ 이미지 생성 완료")
+        # IMAGE_PROVIDER 환경변수에 따라 이미지 생성 서비스 선택
+        image_provider = settings.IMAGE_PROVIDER.lower()
+
+        if image_provider == "nanobanana":
+            logger.info("이미지 생성 서비스: Nano Banana (Gemini 2.5 Flash Image)")
+            image_result = await nanobanana_service.generate_image(
+                prompt=image_prompt,
+                width=1024,
+                height=1024,
+                save_local=True
+            )
+            provider_name = "nanobanana"
+        else:
+            # 기본값: replicate
+            logger.info("이미지 생성 서비스: Replicate (SDXL/Ideogram)")
+            image_result = await replicate_service.generate_image(
+                prompt=image_prompt,
+                width=1024,
+                height=1024,
+                save_local=True
+            )
+            provider_name = "replicate"
+
+        logger.info(f"✓ 이미지 생성 완료 (provider: {provider_name})")
 
         # === 생성 시간 계산 ===
         generation_time = int(time.time() - start_time)
@@ -136,7 +155,7 @@ async def generate_full_content(
                     hashtags=selected_copy.get("hashtags", []),
                     image_prompt=image_prompt,
                     image_url=image_result.get("local_url") or image_result["original_url"],
-                    image_provider="replicate",
+                    image_provider=provider_name,
                     status=ContentStatus.COMPLETED,
                     generation_time=generation_time
                 )

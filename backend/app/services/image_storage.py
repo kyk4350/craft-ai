@@ -169,6 +169,72 @@ class ImageStorageService:
             # 최적화 실패 시 원본 반환
             return image_data
 
+    async def save_from_bytes(
+        self,
+        image_bytes: bytes,
+        optimize: bool = True,
+        max_size: tuple = (2048, 2048),
+        quality: int = 85
+    ) -> Optional[dict]:
+        """
+        bytes 데이터로부터 이미지 저장
+
+        Args:
+            image_bytes: 이미지 바이트 데이터
+            optimize: 최적화 여부
+            max_size: 최대 크기 (width, height)
+            quality: JPEG 품질 (1-100)
+
+        Returns:
+            {
+                "file_path": "저장된 파일 경로",
+                "public_url": "공개 URL",
+                "size": 파일 크기 (bytes)
+            }
+        """
+        try:
+            logger.info(f"이미지 저장 시작: {len(image_bytes)} bytes")
+
+            # 파일명 생성 (바이트 해시 + 타임스탬프)
+            data_hash = hashlib.md5(image_bytes).hexdigest()[:12]
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"{timestamp}_{data_hash}.png"
+            file_path = self.storage_dir / filename
+
+            if optimize:
+                # 이미지 최적화
+                logger.info(f"이미지 최적화 시작...")
+                optimized_data = self._optimize_image(
+                    image_bytes,
+                    max_size=max_size,
+                    quality=quality
+                )
+                logger.info(f"이미지 최적화 완료: {len(optimized_data)} bytes")
+
+                # 최적화된 이미지 저장
+                async with aiofiles.open(str(file_path), 'wb') as f:
+                    await f.write(optimized_data)
+
+                file_size = len(optimized_data)
+            else:
+                # 원본 그대로 저장
+                async with aiofiles.open(str(file_path), 'wb') as f:
+                    await f.write(image_bytes)
+
+                file_size = len(image_bytes)
+
+            logger.info(f"✓ 이미지 저장 완료: {file_path} ({file_size:,} bytes)")
+
+            return {
+                "file_path": str(file_path),
+                "public_url": self.get_public_url(filename),
+                "size": file_size
+            }
+
+        except Exception as e:
+            logger.error(f"이미지 저장 실패: {str(e)}")
+            return None
+
     def get_public_url(self, filename: str) -> str:
         """
         저장된 파일의 공개 URL 생성
