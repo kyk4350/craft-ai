@@ -12,6 +12,7 @@ import asyncio
 from app.models.performance import Performance, DataSource
 from app.models.content import Content
 from app.config import settings
+from app.services.vector_service import vector_service
 
 logger = logging.getLogger(__name__)
 
@@ -97,9 +98,28 @@ class PerformanceService:
     async def simulate_reactions(
         self,
         personas: List[Dict[str, Any]],
-        content_data: Dict[str, Any]
+        content_data: Dict[str, Any],
+        similar_contents: Optional[List[Dict[str, Any]]] = None
     ) -> Dict[str, Any]:
-        """페르소나별 콘텐츠 반응 시뮬레이션"""
+        """페르소나별 콘텐츠 반응 시뮬레이션 (RAG 적용)"""
+
+        # RAG: 유사 콘텐츠 성과 데이터를 참고 자료로 추가
+        reference_section = ""
+        if similar_contents:
+            reference_section = "\n\n**참고: 유사 콘텐츠의 과거 성과 데이터**\n"
+            reference_section += "아래는 타겟과 콘텐츠가 유사한 과거 콘텐츠들의 실제/예측 성과입니다. 이를 참고하여 더 정확한 예측을 하세요.\n\n"
+
+            for i, similar in enumerate(similar_contents[:3], 1):  # 상위 3개만 사용
+                reference_section += f"{i}. 유사도: {similar['score']:.2f}\n"
+                reference_section += f"   카피: {similar['copy_text'][:100]}...\n"
+                reference_section += f"   타겟: {similar['target_age']} {similar['target_gender']}\n"
+
+                # 해당 콘텐츠의 성과 데이터가 있다면 포함
+                perf = similar.get('performance')
+                if perf:
+                    reference_section += f"   성과: CTR {perf.get('ctr', 0):.1f}%, 참여율 {perf.get('engagement_rate', 0):.1f}%, "
+                    reference_section += f"전환율 {perf.get('conversion_rate', 0):.1f}%, 브랜드 기억도 {perf.get('brand_recall_score', 0):.0f}\n"
+                reference_section += "\n"
 
         prompt = f"""
 당신은 마케팅 성과 분석 전문가입니다.
@@ -113,7 +133,7 @@ class PerformanceService:
 - 전략: {content_data.get('strategy', {}).get('name')} - {content_data.get('strategy', {}).get('core_message')}
 - 카피: {content_data.get('copy_text')}
 - 해시태그: {', '.join(content_data.get('hashtags', []))}
-
+{reference_section}
 각 페르소나의 반응을 예측하세요:
 1. will_click: 클릭 여부 (true/false)
 2. engagement_action: 참여 행동 (null, "like", "comment", "share", "save")
@@ -197,7 +217,7 @@ class PerformanceService:
             }
 
             # 1. 페르소나 생성
-            logger.info(f"[1/3] 페르소나 생성 중...")
+            logger.info(f"[1/4] 페르소나 생성 중...")
             personas = await self.generate_personas(
                 target_age_group=content.target_age_group or "20대",
                 target_gender=content.target_gender or "무관",
@@ -209,19 +229,59 @@ class PerformanceService:
                 logger.error("페르소나 생성 실패")
                 return None
 
-            # 2. 반응 시뮬레이션
-            logger.info(f"[2/3] 반응 시뮬레이션 중...")
+            # 2. RAG: 유사 콘텐츠 검색 및 성과 데이터 수집
+            logger.info(f"[2/4] 유사 콘텐츠 검색 중... (RAG)")
+            similar_contents = []
+            try:
+                # Vector DB에서 유사 콘텐츠 검색
+                query_text = f"카피: {content_data['copy_text']}\n이미지 프롬프트: {content_data['image_prompt']}"
+                similar_results = vector_service.search_similar_contents(
+                    query_text=query_text,
+                    target_age=content.target_age_group,
+                    target_gender=content.target_gender,
+                    limit=5
+                )
+
+                # 각 유사 콘텐츠의 성과 데이터 조회
+                for similar in similar_results:
+                    similar_content_id = similar.get('content_id')
+                    if similar_content_id and similar_content_id != content_id:
+                        # 해당 콘텐츠의 성과 데이터 조회
+                        perf = self.db.query(Performance).filter(
+                            Performance.content_id == similar_content_id
+                        ).first()
+
+                        if perf:
+                            similar['performance'] = {
+                                'ctr': perf.ctr,
+                                'engagement_rate': perf.engagement_rate,
+                                'conversion_rate': perf.conversion_rate,
+                                'brand_recall_score': perf.brand_recall_score
+                            }
+                            similar_contents.append(similar)
+
+                if similar_contents:
+                    logger.info(f"✓ 유사 콘텐츠 {len(similar_contents)}개 발견 (성과 데이터 포함)")
+                else:
+                    logger.info("⚠️  유사 콘텐츠가 없거나 성과 데이터가 없습니다. 기본 예측으로 진행합니다.")
+
+            except Exception as e:
+                logger.warning(f"⚠️  유사 콘텐츠 검색 실패: {str(e)}. 기본 예측으로 진행합니다.")
+
+            # 3. 반응 시뮬레이션 (RAG 적용)
+            logger.info(f"[3/4] 반응 시뮬레이션 중... (RAG 적용)")
             simulation_result = await self.simulate_reactions(
                 personas=personas,
-                content_data=content_data
+                content_data=content_data,
+                similar_contents=similar_contents if similar_contents else None
             )
 
             if not simulation_result:
                 logger.error("반응 시뮬레이션 실패")
                 return None
 
-            # 3. Performance 객체 생성
-            logger.info(f"[3/3] 성과 데이터 저장 중...")
+            # 4. Performance 객체 생성
+            logger.info(f"[4/4] 성과 데이터 저장 중...")
             metrics = simulation_result['overall_metrics']
 
             performance = Performance(

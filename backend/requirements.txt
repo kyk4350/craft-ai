@@ -22,11 +22,11 @@ alembic>=1.12.1
 # Redis (2주차 이후 필요 시 설치)
 # redis>=5.0.1
 
-# Vector DB (4주차 이후 필요 시 설치)
-# qdrant-client>=1.7.0
+# Vector DB (4주차)
+qdrant-client>=1.7.0
 
-# 임베딩 (4주차 이후 필요 시 설치)
-# voyageai>=0.1.0
+# 임베딩 (4주차)
+voyageai>=0.2.0
 
 # 데이터 처리 (2주차)
 pandas>=2.1.3

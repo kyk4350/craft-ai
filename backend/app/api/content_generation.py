@@ -15,6 +15,7 @@ from app.schemas.content import (
 from app.services.gemini_service import gemini_service
 from app.services.nanobanana_service import nanobanana_service
 from app.services.replicate_service import replicate_service
+from app.services.vector_service import vector_service
 from app.models.content import Content, ContentStatus
 from app.models.base import get_db
 from app.config import settings
@@ -166,6 +167,31 @@ async def generate_full_content(
                 content_id = content.id
 
                 logger.info(f"✓ 데이터베이스 저장 완료 (ID: {content_id})")
+
+                # === Vector DB 저장 (임베딩 생성 및 저장) ===
+                try:
+                    logger.info(f"Vector DB 저장 중... (content_id: {content_id})")
+                    vector_success = vector_service.save_content_embedding(
+                        content_id=content_id,
+                        copy_text=selected_copy["text"],
+                        image_prompt=image_prompt,
+                        metadata={
+                            "target_age": request.target_age,
+                            "target_gender": request.target_gender,
+                            "category": request.category,
+                            "product_name": request.product_name,
+                            "strategy_name": selected_strategy.get("name", ""),
+                            "copy_tone": selected_copy["tone"]
+                        }
+                    )
+                    if vector_success:
+                        logger.info(f"✓ Vector DB 저장 완료 (content_id: {content_id})")
+                    else:
+                        logger.warning(f"⚠️  Vector DB 저장 실패 (content_id: {content_id})")
+                except Exception as ve:
+                    logger.error(f"Vector DB 저장 에러: {str(ve)}")
+                    # Vector DB 저장 실패해도 전체 프로세스는 계속 진행
+
             except Exception as e:
                 logger.error(f"데이터베이스 저장 실패: {str(e)}")
                 db.rollback()
