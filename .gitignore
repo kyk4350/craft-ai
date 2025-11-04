@@ -87,3 +87,14 @@ claude.md
 프로젝트_기획서_v2.md
 기능_정의서_v2.md
 data/raw/*.png
+
+# Test files
+backend/test_*.py
+backend/check_*.py
+backend/reset_*.py
+
+# Generated images
+backend/storage/images/*.png
+backend/storage/images/*.jpg
+backend/storage/images/*.jpeg
+backend/storage/images/*.webp
