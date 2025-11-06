@@ -46,20 +46,20 @@ class SegmentationService:
 
     def filter_profiles(
         self,
-        age_group: Optional[str] = None,
-        gender: Optional[str] = None,
-        income_level: Optional[str] = None,
+        age_groups: Optional[List[str]] = None,
+        genders: Optional[List[str]] = None,
+        income_levels: Optional[List[str]] = None,
         interests: Optional[List[str]] = None,
         category: Optional[str] = None,
         limit: Optional[int] = None
     ) -> List[Dict]:
         """
-        조건에 맞는 프로필 필터링
+        조건에 맞는 프로필 필터링 (OR 조건)
 
         Args:
-            age_group: 나이대 (10대, 20대, 30대, 40대, 50대, 60대+)
-            gender: 성별 (남성, 여성)
-            income_level: 소득 수준 (저소득, 중소득, 중상소득, 고소득)
+            age_groups: 나이대 리스트 (10대, 20대, 30대, 40대, 50대, 60대+)
+            genders: 성별 리스트 (남성, 여성)
+            income_levels: 소득 수준 리스트 (저소득, 중소득, 중상소득, 고소득)
             interests: 관심사 리스트 (하나라도 포함되면 매칭)
             category: 제품 카테고리 (화장품, 식품, 패션, 전자제품, 서비스)
             limit: 최대 반환 개수
@@ -69,33 +69,33 @@ class SegmentationService:
         """
         filtered = self.profiles.copy()
 
-        # 나이대 필터
-        if age_group:
-            filtered = [p for p in filtered if p.get('age_group') == age_group]
-            logger.info(f"나이대 필터 ({age_group}): {len(filtered)}개")
+        # 나이대 필터 (OR 조건)
+        if age_groups and len(age_groups) > 0:
+            filtered = [p for p in filtered if p.get('age_group') in age_groups]
+            logger.info(f"나이대 필터 ({age_groups}): {len(filtered)}개")
 
-        # 성별 필터 ("무관"은 항상 포함)
-        if gender:
+        # 성별 필터 (OR 조건, "무관"은 항상 포함)
+        if genders and len(genders) > 0:
             filtered = [
                 p for p in filtered
-                if p.get('gender') == gender or p.get('gender') == "무관"
+                if p.get('gender') in genders or p.get('gender') == "무관"
             ]
-            logger.info(f"성별 필터 ({gender} + 무관): {len(filtered)}개")
+            logger.info(f"성별 필터 ({genders} + 무관): {len(filtered)}개")
 
-        # 소득 필터
-        if income_level:
-            filtered = [p for p in filtered if p.get('income_level') == income_level]
-            logger.info(f"소득 필터 ({income_level}): {len(filtered)}개")
+        # 소득 필터 (OR 조건)
+        if income_levels and len(income_levels) > 0:
+            filtered = [p for p in filtered if p.get('income_level') in income_levels]
+            logger.info(f"소득 필터 ({income_levels}): {len(filtered)}개")
 
         # 관심사 필터 (하나라도 포함)
-        if interests:
+        if interests and len(interests) > 0:
             filtered = [
                 p for p in filtered
                 if any(interest in p.get('interests', []) for interest in interests)
             ]
             logger.info(f"관심사 필터 ({interests}): {len(filtered)}개")
 
-        # 카테고리 필터
+        # 카테고리 필터 (단일 선택)
         if category:
             filtered = [p for p in filtered if p.get('category') == category]
             logger.info(f"카테고리 필터 ({category}): {len(filtered)}개")

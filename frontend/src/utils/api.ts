@@ -59,8 +59,8 @@ export interface FullContentGenerationRequest {
   product_name: string;
   product_description: string;
   category: string;
-  target_age: string;
-  target_gender: string;
+  target_ages: string[];
+  target_genders: string[];
   target_interests: string[];
   copy_tone: string;
   target_income_level?: string;
@@ -90,7 +90,7 @@ export interface SegmentFilterRequest {
   genders?: string[];
   interests?: string[];
   income_levels?: string[];
-  categories?: string[];
+  category?: string;
 }
 
 // === Axios 인스턴스 생성 ===
@@ -105,10 +105,18 @@ const apiClient: AxiosInstance = axios.create({
 // 요청 인터셉터
 apiClient.interceptors.request.use(
   (config) => {
-    // 토큰이 있으면 헤더에 추가 (향후 인증 기능 추가 시)
-    const token = localStorage.getItem('token');
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Zustand 스토어에서 토큰 가져오기
+    const authStorage = localStorage.getItem('auth-storage');
+    if (authStorage) {
+      try {
+        const { state } = JSON.parse(authStorage);
+        const token = state?.token;
+        if (token && config.headers) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      } catch (e) {
+        console.error('Failed to parse auth storage:', e);
+      }
     }
     return config;
   },
@@ -182,35 +190,7 @@ export const contentApi = {
   },
 };
 
-export const segmentationApi = {
-  /**
-   * 타겟 필터링
-   */
-  filterTargets: async (data: SegmentFilterRequest): Promise<unknown> => {
-    return apiClient.post('/api/segmentation/filter', data);
-  },
-
-  /**
-   * 타겟 검색
-   */
-  searchTargets: async (data: { keyword: string }): Promise<unknown> => {
-    return apiClient.post('/api/segmentation/search', data);
-  },
-
-  /**
-   * 전체 요약
-   */
-  getSummary: async (): Promise<unknown> => {
-    return apiClient.get('/api/segmentation/summary');
-  },
-
-  /**
-   * 인사이트 조회
-   */
-  getInsights: async (params: Record<string, string>): Promise<unknown> => {
-    return apiClient.get('/api/segmentation/insights', { params });
-  },
-};
+// 타겟 세분화 API 제거됨 - AI 실시간 분석으로 대체
 
 export const performanceApi = {
   /**
@@ -225,6 +205,173 @@ export const performanceApi = {
    */
   getPerformance: async (contentId: number): Promise<PerformanceResponse> => {
     return apiClient.get(`/api/performance/${contentId}`);
+  },
+};
+
+export const analyticsApi = {
+  /**
+   * 대시보드 핵심 지표 요약
+   */
+  getSummary: async (): Promise<unknown> => {
+    return apiClient.get('/api/analytics/summary');
+  },
+
+  /**
+   * 전략별 평균 성과
+   */
+  getPerformanceByStrategy: async (): Promise<unknown> => {
+    return apiClient.get('/api/analytics/by-strategy');
+  },
+
+  /**
+   * 타겟별 평균 성과
+   */
+  getPerformanceByTarget: async (): Promise<unknown> => {
+    return apiClient.get('/api/analytics/by-target');
+  },
+
+  /**
+   * 최고 성과 콘텐츠 목록
+   */
+  getTopContents: async (limit: number = 5): Promise<unknown> => {
+    return apiClient.get(`/api/analytics/top-contents?limit=${limit}`);
+  },
+};
+
+// Auth API 타입 정의
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  name: string;
+}
+
+export interface LoginRequest {
+  username: string; // FastAPI OAuth2PasswordRequestForm uses 'username'
+  password: string;
+}
+
+export interface AuthResponse {
+  access_token: string;
+  token_type: string;
+  user: {
+    id: number;
+    email: string;
+    name: string;
+    created_at: string;
+  };
+}
+
+export interface RegisterResponse {
+  success: boolean;
+  message: string;
+  user: {
+    id: number;
+    email: string;
+    name: string;
+    created_at: string;
+  };
+}
+
+export const authApi = {
+  /**
+   * 회원가입
+   */
+  register: async (data: RegisterRequest): Promise<RegisterResponse> => {
+    return apiClient.post('/api/auth/register', data);
+  },
+
+  /**
+   * 로그인
+   */
+  login: async (data: LoginRequest): Promise<AuthResponse> => {
+    // OAuth2PasswordRequestForm 형식으로 전송 (form data)
+    const formData = new FormData();
+    formData.append('username', data.username);
+    formData.append('password', data.password);
+
+    return axios.post(`${API_BASE_URL}/api/auth/login`, formData, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    }).then(res => res.data);
+  },
+
+  /**
+   * Google 로그인
+   */
+  googleLogin: async (token: string): Promise<AuthResponse> => {
+    return apiClient.post('/api/auth/google', { token });
+  },
+};
+
+// Contents API 타입 정의
+export interface ContentItem {
+  id: number;
+  project_id: number | null;
+  product_name: string;
+  category: string;
+  target_age_group: string;
+  target_gender: string;
+  target_interests: string[];
+  strategy: Record<string, unknown>;
+  copy_text: string;
+  copy_tone: string;
+  hashtags: string[];
+  image_url: string;
+  image_provider?: string;
+  status: string;
+  created_at: string;
+  generation_time?: number;
+  performance?: {
+    ctr: number;
+    engagement_rate: number;
+    conversion_rate: number;
+    brand_recall_score: number;
+    is_prediction: boolean;
+  };
+}
+
+export interface ContentsListResponse {
+  success: boolean;
+  data: {
+    contents: ContentItem[];
+    total: number;
+    page: number;
+    limit: number;
+  };
+  message: string;
+}
+
+export const contentsApi = {
+  /**
+   * 콘텐츠 목록 조회
+   */
+  getContents: async (params?: {
+    project_id?: number;
+    limit?: number;
+    offset?: number;
+  }): Promise<ContentsListResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.project_id) queryParams.append('project_id', params.project_id.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.offset) queryParams.append('offset', params.offset.toString());
+
+    const queryString = queryParams.toString();
+    return apiClient.get(`/api/contents${queryString ? '?' + queryString : ''}`);
+  },
+
+  /**
+   * 콘텐츠 상세 조회
+   */
+  getContent: async (contentId: number): Promise<{ success: boolean; data: ContentItem; message: string }> => {
+    return apiClient.get(`/api/contents/${contentId}`);
+  },
+
+  /**
+   * 콘텐츠 삭제
+   */
+  deleteContent: async (contentId: number): Promise<{ success: boolean; message: string }> => {
+    return apiClient.delete(`/api/contents/${contentId}`);
   },
 };
 

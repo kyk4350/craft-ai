@@ -11,11 +11,15 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
 
+    # 인증
+    SECRET_KEY: str = "FMkksDAZiBOx2bXeYyb0IzyCP92HGYIes4Q2PwrMGA4"  # 프로덕션에서는 환경변수로 설정
+
     # API Keys
     GEMINI_API_KEY: Optional[str] = None
     REPLICATE_API_TOKEN: Optional[str] = None
     STABILITY_API_KEY: Optional[str] = None
     VOYAGE_AI_API_KEY: Optional[str] = None
+    IDEOGRAM_API_KEY: Optional[str] = None
 
     # AI 모델 설정
     IMAGE_PROVIDER: str = "replicate"  # replicate (SDXL, Ideogram)
@@ -31,6 +35,11 @@ class Settings(BaseSettings):
     # Qdrant Vector DB
     QDRANT_URL: Optional[str] = None
     QDRANT_API_KEY: Optional[str] = None
+
+    # Google OAuth
+    GOOGLE_CLIENT_ID: Optional[str] = None
+    GOOGLE_CLIENT_SECRET: Optional[str] = None
+    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/auth/google/callback"
 
     # CORS
     BACKEND_CORS_ORIGINS: list = ["http://localhost:3000", "http://localhost:5173"]

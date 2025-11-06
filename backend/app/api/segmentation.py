@@ -15,9 +15,9 @@ logger = logging.getLogger(__name__)
 
 class SegmentFilterRequest(BaseModel):
     """세그먼트 필터링 요청"""
-    age_group: Optional[str] = Field(None, description="나이대 (10대, 20대, 30대, 40대, 50대, 60대 이상)")
-    gender: Optional[str] = Field(None, description="성별 (남성, 여성)")
-    income_level: Optional[str] = Field(None, description="소득 수준 (저소득, 중소득, 중상소득, 고소득)")
+    age_groups: Optional[List[str]] = Field(None, description="나이대 리스트 (10대, 20대, 30대, 40대, 50대, 60대 이상)")
+    genders: Optional[List[str]] = Field(None, description="성별 리스트 (남성, 여성)")
+    income_levels: Optional[List[str]] = Field(None, description="소득 수준 리스트 (저소득, 중소득, 중상소득, 고소득)")
     interests: Optional[List[str]] = Field(None, description="관심사 리스트")
     category: Optional[str] = Field(None, description="제품 카테고리 (화장품, 식품, 패션, 전자제품, 서비스)")
     limit: Optional[int] = Field(50, description="최대 반환 개수")
@@ -44,10 +44,11 @@ async def filter_segments(request: SegmentFilterRequest):
     Example request:
     ```json
     {
-        "age_group": "10대",
-        "gender": "여성",
-        "income_level": "저소득",
+        "age_groups": ["10대", "20대"],
+        "genders": ["여성"],
+        "income_levels": ["저소득", "중소득"],
         "interests": ["패션"],
+        "category": "화장품",
         "limit": 10
     }
     ```
@@ -57,23 +58,31 @@ async def filter_segments(request: SegmentFilterRequest):
 
         # 필터링 실행
         profiles = service.filter_profiles(
-            age_group=request.age_group,
-            gender=request.gender,
-            income_level=request.income_level,
+            age_groups=request.age_groups,
+            genders=request.genders,
+            income_levels=request.income_levels,
             interests=request.interests,
             category=request.category,
             limit=request.limit
         )
 
         # 인사이트 추출
-        insights = service.extract_insights(profiles)
+        raw_insights = service.extract_insights(profiles)
+
+        # 프론트엔드 형식으로 변환
+        frontend_insights = {
+            "pain_points": [item['pain_point'] for item in raw_insights.get('psychographics', {}).get('top_pain_points', [])[:5]],
+            "preferred_channels": [item['channel'] for item in raw_insights.get('channels', {}).get('top_channels', [])[:5]],
+            "tone_preferences": [raw_insights.get('marketing_recommendations', {}).get('content_strategy', {}).get('tone_and_manner', '친근하고 트렌디한 톤')],
+            "message_strategies": raw_insights.get('marketing_recommendations', {}).get('content_strategy', {}).get('message_strategy', [])
+        }
 
         return SegmentFilterResponse(
             success=True,
             message=f"{len(profiles)}개의 타겟 프로필을 찾았습니다.",
             data={
                 "profiles": profiles,
-                "insights": insights
+                "insights": frontend_insights
             }
         )
 

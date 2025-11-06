@@ -22,7 +22,13 @@ class Content(Base, TimestampMixin):
     __tablename__ = "contents"
 
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)  # 콘텐츠 소유자
     project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=True)  # 프로젝트 없이도 콘텐츠 생성 가능
+
+    # 제품 정보 (프로젝트 없이도 저장)
+    product_name = Column(String(200))
+    product_description = Column(Text)
+    category = Column(String(100))
 
     # 타겟 정보 (Target 모델과 직접 관계는 없고 필터링 조건만 저장)
     target_age_group = Column(String(50))
@@ -49,6 +55,7 @@ class Content(Base, TimestampMixin):
     predicted_engagement = Column(String(50))  # 예상 참여도
 
     # Relationships
+    user = relationship("User", back_populates="contents")
     project = relationship("Project", back_populates="contents")
 
     def __repr__(self):

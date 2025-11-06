@@ -238,81 +238,115 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
 - [x] RAG 통합 테스트 완료
 
 ### 대시보드 (프론트엔드)
-- [ ] 대시보드 페이지 구현 (`frontend/src/pages/Dashboard.tsx`)
-- [ ] 주요 지표 카드 컴포넌트
-- [ ] 타겟별 비교 차트 (Chart.js 또는 Recharts)
-- [ ] 전략별 비교 차트
-- [ ] AI 인사이트 텍스트 표시
-- [ ] 성과 예측 요청 및 표시 로직
+- [x] 대시보드 페이지 구현 (`frontend/src/pages/Dashboard.tsx`)
+- [x] 주요 지표 카드 컴포넌트 (4개: 총 콘텐츠, 평균 CTR, 평균 참여율, 최고 CTR)
+- [x] 타겟별 비교 차트 (Recharts - 라인 차트)
+- [x] 전략별 비교 차트 (Recharts - 막대 차트)
+- [x] AI 인사이트 텍스트 표시
+- [x] Analytics API 구현 및 통합
+  - [x] `GET /api/analytics/summary` - 핵심 지표 요약
+  - [x] `GET /api/analytics/by-strategy` - 전략별 성과
+  - [x] `GET /api/analytics/by-target` - 타겟별 성과
+  - [x] `GET /api/analytics/top-contents` - Top 5 콘텐츠
+- [x] Content 모델 개선 (product_name, product_description, category 필드 추가)
+- [x] 타겟 나이대 표기 정규화 (20-29 → 20대)
 
 ---
 
 ## 5주차: 기능 통합 및 서비스화
 
 ### 사용자 인증 (JWT) - 우선 구현
-- [ ] User 모델 확인 및 수정 (필요시)
-- [ ] 회원가입 API (`POST /api/auth/register`)
-  - [ ] 이메일 중복 체크
-  - [ ] 비밀번호 해싱 (bcrypt)
-  - [ ] 사용자 생성
-- [ ] 로그인 API (`POST /api/auth/login`)
-  - [ ] 이메일/비밀번호 검증
-  - [ ] JWT 토큰 발급 (access token)
+- [x] User 모델 확인 및 수정 (google_id 필드 추가)
+- [x] 회원가입 API (`POST /api/auth/register`)
+  - [x] 이메일 중복 체크
+  - [x] 비밀번호 해싱 (bcrypt)
+  - [x] 사용자 생성
+- [x] 로그인 API (`POST /api/auth/login`)
+  - [x] 이메일/비밀번호 검증
+  - [x] JWT 토큰 발급 (access token)
   - [ ] Refresh token (선택)
-- [ ] 인증 미들웨어
-  - [ ] JWT 토큰 검증
-  - [ ] 현재 사용자 정보 추출
-  - [ ] Protected routes
-- [ ] 프론트엔드 인증
-  - [ ] 로그인 페이지 (`frontend/src/pages/Login.tsx`)
-  - [ ] 회원가입 페이지 (`frontend/src/pages/Register.tsx`)
-  - [ ] JWT 토큰 저장 (localStorage)
-  - [ ] Axios 인터셉터 (토큰 자동 추가)
-  - [ ] 로그아웃 기능
-  - [ ] Protected routes (React Router)
+- [x] 인증 미들웨어
+  - [x] JWT 토큰 검증
+  - [x] 현재 사용자 정보 추출
+  - [x] Protected routes
+- [x] Google OAuth 백엔드 구현
+  - [x] Google OAuth 라이브러리 설치
+  - [x] 환경변수 설정 (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET)
+  - [x] User 모델에 google_id 필드 추가
+  - [x] Google 로그인 API (`POST /api/auth/google`)
+  - [x] Google ID 토큰 검증 및 자동 회원가입
+- [x] 모든 API에 로그인 필수 적용
+  - [x] Content 생성 API에 인증 추가
+  - [x] Contents API에 인증 추가 (목록, 상세, 삭제)
+  - [x] 사용자별 데이터 격리 (본인 콘텐츠만 조회/수정/삭제)
+- [x] 프론트엔드 인증
+  - [x] 로그인 페이지 (`frontend/src/pages/Login.tsx`)
+  - [x] 회원가입 페이지 (`frontend/src/pages/Register.tsx`)
+  - [ ] Google 로그인 버튼 추가 (백엔드 API 준비 완료, 프론트엔드 UI 미구현)
+  - [x] JWT 토큰 저장 (localStorage via Zustand persist)
+  - [x] Axios 인터셉터 (토큰 자동 추가)
+  - [x] 로그아웃 기능
+  - [x] Protected routes (React Router)
 
 ### React 프론트엔드 본격 개발
-- [ ] 라우팅 설정 (React Router)
-- [ ] 전역 상태 관리 (Zustand)
+- [x] 라우팅 설정 (React Router)
+- [x] 전역 상태 관리 (Zustand)
   - [ ] 프로젝트 스토어
   - [ ] 콘텐츠 스토어
-  - [ ] 사용자 스토어
-- [ ] 메인 대시보드 페이지 (`frontend/src/pages/Dashboard.tsx`)
+  - [x] 사용자 스토어 (authStore.ts)
+- [x] 메인 대시보드 페이지 (`frontend/src/pages/Dashboard.tsx`) - 이미 구현됨
 - [ ] 프로젝트 목록 페이지 (`frontend/src/pages/Projects.tsx`)
 - [ ] 프로젝트 생성/수정 페이지 (`frontend/src/pages/ProjectForm.tsx`)
-- [ ] 콘텐츠 생성 페이지 (`frontend/src/pages/Generate.tsx`)
-- [ ] 히스토리 페이지 (`frontend/src/pages/History.tsx`)
-- [ ] 상세 모달 컴포넌트 (`frontend/src/components/DetailModal.tsx`)
+- [x] 콘텐츠 생성 페이지 (`frontend/src/pages/GeneratePage.tsx`) - 이미 구현됨
+- [x] 히스토리 페이지 (`frontend/src/pages/History.tsx`)
+  - [x] 콘텐츠 목록 카드 뷰
+  - [x] 콘텐츠 상세 모달
+  - [x] 삭제 기능
+  - [x] Contents API 연동 (contentsApi)
 
 ### 타겟 세분화 UI
-- [ ] 타겟 필터링 페이지 (`frontend/src/pages/TargetFilter.tsx`)
-  - [ ] 필터 옵션 UI (나이대, 성별, 소득, 관심사, 카테고리)
-  - [ ] 필터 결과 표시 (매칭된 타겟 수, 프로필 목록)
-  - [ ] 인사이트 자동 표시 (고충, 선호 채널, 톤앤매너, 메시지 전략)
+- [x] 타겟 필터링 페이지 (`frontend/src/pages/TargetFilter.tsx`)
+  - [x] 필터 옵션 UI (나이대, 성별, 소득, 관심사, 카테고리)
+  - [x] 필터 결과 표시 (매칭된 타겟 수, 프로필 목록)
+  - [x] 인사이트 자동 표시 (고충, 선호 채널, 톤앤매너, 메시지 전략)
+  - [x] 카테고리 단일 선택으로 일관성 확보
+  - [x] 관심사 선택 및 콘텐츠 생성 자동 연동
+- [ ] **타겟 세분화 개선 사항 (나중에 추가)**
+  - [ ] 플랫폼 필터 추가 (Instagram, Facebook, 카카오톡, 네이버)
+  - [ ] 매칭 프로필 수 실시간 표시 (필터 변경 시마다 업데이트)
+  - [ ] 세그먼트 저장 기능 (자주 쓰는 타겟 조합 저장/불러오기)
+  - [ ] 시각화 기능
+    - [ ] 세그먼트 분포 차트 (나이대×성별 히트맵)
+    - [ ] 관심사 워드 클라우드
+    - [ ] 소득 분포 파이 차트
+  - [ ] 유사 타겟 제안 (선택한 조합에 데이터 없을 때)
+  - [ ] 예상 도달 인원 표시 (기획서 DATA-003)
 - [ ] 타겟 검색 컴포넌트 (`frontend/src/components/TargetSearch.tsx`)
   - [ ] 키워드 검색
   - [ ] 검색 결과 표시
 - [ ] 타겟 요약 대시보드 컴포넌트 (`frontend/src/components/TargetSummary.tsx`)
   - [ ] 전체 타겟 분포 차트
   - [ ] 주요 통계 카드
-- [ ] 세분화 → 콘텐츠 생성 연동
-  - [ ] 필터링된 타겟 정보를 콘텐츠 생성 폼에 자동 입력
+- [x] 세분화 → 콘텐츠 생성 연동
+  - [x] 필터링된 타겟 정보를 콘텐츠 생성 폼에 자동 입력
 
 ### 백엔드 API 완성
-- [ ] 프로젝트 CRUD API
-  - [ ] `POST /api/projects` - 생성
-  - [ ] `GET /api/projects` - 목록
-  - [ ] `GET /api/projects/{id}` - 상세
-  - [ ] `PUT /api/projects/{id}` - 수정
-  - [ ] `DELETE /api/projects/{id}` - 삭제
-- [ ] 콘텐츠 API
-  - [ ] `GET /api/contents` - 목록
-  - [ ] `GET /api/contents/{id}` - 상세
-  - [ ] `DELETE /api/contents/{id}` - 삭제
-- [ ] 타겟 API
-  - [ ] `GET /api/targets` - 세그먼트 목록
-  - [ ] `GET /api/targets/{id}` - 세그먼트 상세
-- [ ] API 문서 자동 생성 (FastAPI Swagger)
+- [x] 프로젝트 CRUD API (인증 포함)
+  - [x] `POST /api/projects` - 생성
+  - [x] `GET /api/projects` - 목록
+  - [x] `GET /api/projects/{id}` - 상세
+  - [x] `PUT /api/projects/{id}` - 수정
+  - [x] `DELETE /api/projects/{id}` - 삭제
+- [x] 콘텐츠 API (인증 포함)
+  - [x] `GET /api/contents` - 목록 (본인 콘텐츠만)
+  - [x] `GET /api/contents/{id}` - 상세 (본인 콘텐츠만)
+  - [x] `DELETE /api/contents/{id}` - 삭제 (본인 콘텐츠만)
+- [x] 타겟 API (세분화 API)
+  - [x] `POST /api/segmentation/filter` - 필터링
+  - [x] `POST /api/segmentation/search` - 키워드 검색
+  - [x] `GET /api/segmentation/summary` - 전체 요약
+  - [x] `GET /api/segmentation/insights` - 인사이트 조회
+- [x] API 문서 자동 생성 (FastAPI Swagger - /docs)
 
 ### Redis 캐싱
 - [ ] Redis 연결 설정
@@ -562,7 +596,7 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
 - [x] 성과 분석 시스템 작동
 - [x] Vector DB 통합 완료 (Qdrant + Voyage AI)
 - [x] RAG 구현 및 테스트 완료
-- [ ] 대시보드 프론트엔드 (남은 작업)
+- [x] 대시보드 프론트엔드 완료 (통계 중심 재구현)
 
 ### 5주차 목표
 - [ ] 모든 API 엔드포인트 완성
@@ -626,11 +660,19 @@ Week 1 Complete: 환경 설정 및 API 키 발급 완료
   - [x] 성과 예측 시스템 (AI 시뮬레이션)
   - [x] Vector DB 통합 (Qdrant + Voyage AI)
   - [x] RAG 구현 (유사 콘텐츠 기반 성과 예측)
-  - [ ] 대시보드 프론트엔드 (남은 작업)
+  - [x] 대시보드 프론트엔드 (통계 중심 구현 완료)
 - [ ] Week 5 Complete: 서비스 통합 완료
 - [ ] Week 6 Complete: 품질 개선 완료
 - [ ] Week 7 Complete: 배포 및 발표 준비 완료 (Vercel + Render)
 
 ---
 
-현재 진행 상황: 4주차 완료 ✅ → 5주차 시작 가능 (서비스 통합 및 프론트엔드 본격 개발)
+현재 진행 상황: **4주차 완료 ✅** → 5주차 시작 (서비스 통합 및 프론트엔드 본격 개발)
+
+**4주차 완료 내역:**
+- 성과 예측 시스템 (AI 시뮬레이션 + RAG)
+- Vector DB 통합 (Qdrant + Voyage AI)
+- Analytics API 구현 (통계 및 분석)
+- 대시보드 프론트엔드 (통계 중심 구현)
+- Content 모델 개선 (product_name 필드 추가)
+- 타겟 나이대 정규화

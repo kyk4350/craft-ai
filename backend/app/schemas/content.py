@@ -115,17 +115,22 @@ class FullContentGenerationRequest(BaseModel):
     # 제품 정보
     product_name: str = Field(..., description="제품명")
     product_description: str = Field(..., description="제품 설명")
-    category: str = Field(..., description="카테고리 (화장품/식품/패션/전자제품/서비스)")
+    category: str = Field(..., description="카테고리 (beauty/food/fashion/electronics/service)")
+    product_image_path: Optional[str] = Field(None, description="업로드된 제품 이미지 파일 경로 (제품 기반 마케팅 이미지 생성 시 사용)")
 
-    # 타겟 정보
-    target_age: str = Field(..., description="타겟 나이대 (10대/20대/30대/40대/50대/60대 이상)")
-    target_gender: str = Field(..., description="타겟 성별 (남성/여성/무관)")
+    # 타겟 정보 (다중 선택 가능)
+    target_ages: List[str] = Field(..., description="타겟 나이대 리스트 (10대/20대/30대/40대/50대/60대 이상)")
+    target_genders: List[str] = Field(..., description="타겟 성별 리스트 (남성/여성/무관)")
     target_interests: List[str] = Field(..., description="타겟 관심사")
     target_income_level: Optional[str] = Field(None, description="소득 수준 (저소득/중소득/중상소득/고소득)")
 
     # 생성 옵션
     strategy_id: Optional[int] = Field(None, description="선택한 전략 ID (1-3). None이면 자동 선택")
     copy_tone: Optional[str] = Field("professional", description="카피 톤 (professional/casual/impact)")
+
+    # 재생성 옵션 (수정 요청)
+    regenerate_type: Optional[str] = Field(None, description="재생성 타입 (all/image/copy/auto). None이면 신규 생성")
+    custom_request: Optional[str] = Field(None, description="사용자 자유 입력 수정 요청 (regenerate_type=auto일 때 사용)")
 
     # 프로젝트 정보 (옵션)
     project_id: Optional[int] = Field(None, description="프로젝트 ID (저장 시 필요)")
@@ -164,3 +169,29 @@ class FullContentGenerationResponse(BaseModel):
                 "generation_time": 35
             }
         }
+
+
+# === 부분 재생성 API ===
+
+class RegenerateImageRequest(BaseModel):
+    """이미지만 재생성 요청"""
+    content_id: str = Field(..., description="기존 콘텐츠 ID")
+    product_name: str = Field(..., description="제품명")
+    product_description: str = Field(..., description="제품 설명")
+    category: str = Field(..., description="카테고리")
+    # 타겟 정보는 기존 콘텐츠에서 재사용하므로 필수 아님
+    image_prompt: Optional[str] = Field(None, description="커스텀 이미지 프롬프트 (선택)")
+
+
+class RegenerateCopyRequest(BaseModel):
+    """카피만 재생성 요청"""
+    content_id: str = Field(..., description="기존 콘텐츠 ID")
+    product_name: str = Field(..., description="제품명")
+    product_description: str = Field(..., description="제품 설명")
+    category: str = Field(..., description="카테고리")
+    target_ages: List[str] = Field(..., description="타겟 연령대")
+    target_genders: List[str] = Field(..., description="타겟 성별")
+    target_interests: List[str] = Field(..., description="타겟 관심사")
+    copy_tone: str = Field(..., description="새로운 카피 톤")
+    strategy_name: Optional[str] = Field(None, description="전략명 (기존 전략 재사용)")
+    core_message: Optional[str] = Field(None, description="핵심 메시지 (기존 전략 재사용)")

@@ -259,22 +259,85 @@ class VectorService:
 
     def get_performance_reference(
         self,
-        content_id: int,
+        query_text: str,
+        target_age: Optional[str] = None,
+        target_gender: Optional[str] = None,
+        category: Optional[str] = None,
         limit: int = 3
     ) -> List[Dict]:
         """
         과거 유사 콘텐츠의 성과 데이터 참조 (RAG)
 
         Args:
-            content_id: 현재 콘텐츠 ID
+            query_text: 검색 쿼리 (카피 + 이미지 프롬프트)
+            target_age: 타겟 나이대 필터
+            target_gender: 타겟 성별 필터
+            category: 카테고리 필터
             limit: 참조할 과거 콘텐츠 개수
 
         Returns:
             과거 유사 콘텐츠 성과 목록
         """
-        # TODO: 실제 구현 시 DB에서 성과 데이터 가져오기
-        # 현재는 유사 콘텐츠 ID만 반환
-        return []
+        from app.models.base import get_db
+        from app.models.performance import Performance
+
+        try:
+            # 유사 콘텐츠 검색
+            similar_contents = self.search_similar_contents(
+                query_text=query_text,
+                target_age=target_age,
+                target_gender=target_gender,
+                category=category,
+                limit=limit
+            )
+
+            if not similar_contents:
+                return []
+
+            # DB에서 성과 데이터 가져오기
+            db_gen = get_db()
+            db = next(db_gen)
+
+            try:
+                content_ids = [content["content_id"] for content in similar_contents]
+                performances = db.query(Performance).filter(
+                    Performance.content_id.in_(content_ids)
+                ).all()
+
+                # 성과 데이터를 딕셔너리로 매핑
+                performance_map = {p.content_id: p for p in performances}
+
+                # 유사 콘텐츠와 성과 데이터 결합
+                results = []
+                for content in similar_contents:
+                    content_id = content["content_id"]
+                    performance = performance_map.get(content_id)
+
+                    if performance:
+                        results.append({
+                            "content_id": content_id,
+                            "similarity_score": content["score"],
+                            "copy_text": content["copy_text"],
+                            "image_prompt": content["image_prompt"],
+                            "performance": {
+                                "impressions": performance.impressions,
+                                "clicks": performance.clicks,
+                                "ctr": performance.ctr,
+                                "engagement_rate": performance.engagement_rate,
+                                "conversion_rate": performance.conversion_rate,
+                                "confidence_score": performance.confidence_score
+                            }
+                        })
+
+                logger.info(f"RAG 성과 참조: {len(results)}개 발견")
+                return results
+
+            finally:
+                db.close()
+
+        except Exception as e:
+            logger.error(f"성과 참조 실패: {str(e)}")
+            return []
 
 
 # 싱글톤 인스턴스

@@ -1,16 +1,20 @@
-import { useState } from 'react';
-import InputForm from '../components/InputForm';
-import LoadingSpinner from '../components/LoadingSpinner';
-import ErrorMessage from '../components/ErrorMessage';
-import ResultDisplay from '../components/ResultDisplay';
-import { contentApi, FullContentGenerationRequest, FullContentGenerationResponse } from '../utils/api';
+import { useState } from "react";
+import InputForm from "../components/InputForm";
+import LoadingSpinner from "../components/LoadingSpinner";
+import ErrorMessage from "../components/ErrorMessage";
+import ResultDisplay from "../components/ResultDisplay";
+import {
+  contentApi,
+  FullContentGenerationRequest,
+  FullContentGenerationResponse,
+} from "../utils/api";
 
 interface FormData {
   product_name: string;
   product_description: string;
   category: string;
-  target_age: string;
-  target_gender: string;
+  target_ages: string[];
+  target_genders: string[];
   target_interests: string[];
   copy_tone: string;
 }
@@ -18,7 +22,9 @@ interface FormData {
 export default function GeneratePage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<FullContentGenerationResponse | null>(null);
+  const [result, setResult] = useState<FullContentGenerationResponse | null>(
+    null
+  );
 
   const handleSubmit = async (formData: FormData) => {
     setIsLoading(true);
@@ -31,8 +37,8 @@ export default function GeneratePage() {
         product_name: formData.product_name,
         product_description: formData.product_description,
         category: formData.category,
-        target_age: formData.target_age,
-        target_gender: formData.target_gender,
+        target_ages: formData.target_ages,
+        target_genders: formData.target_genders,
         target_interests: formData.target_interests,
         copy_tone: formData.copy_tone,
         save_to_db: true, // DB 저장 (성과 예측 기능을 위해 필요)
@@ -40,9 +46,10 @@ export default function GeneratePage() {
 
       setResult(response);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '콘텐츠 생성에 실패했습니다.';
+      const errorMessage =
+        err instanceof Error ? err.message : "콘텐츠 생성에 실패했습니다.";
       setError(errorMessage);
-      console.error('Content generation error:', err);
+      console.error("Content generation error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -75,13 +82,9 @@ export default function GeneratePage() {
           <LoadingSpinner message="AI가 맞춤형 콘텐츠를 생성하고 있습니다..." />
         )}
 
-        {error && (
-          <ErrorMessage message={error} onRetry={handleRetry} />
-        )}
+        {error && <ErrorMessage message={error} onRetry={handleRetry} />}
 
-        {result && !isLoading && (
-          <ResultDisplay result={result} />
-        )}
+        {result && !isLoading && <ResultDisplay result={result} />}
       </div>
     </div>
   );

@@ -1,11 +1,12 @@
-import { useState, ChangeEvent, FormEvent } from 'react';
+import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 interface FormData {
   product_name: string;
   product_description: string;
   category: string;
-  target_age: string;
-  target_gender: string;
+  target_ages: string[];
+  target_genders: string[];
   target_interests: string[];
   copy_tone: string;
 }
@@ -13,6 +14,9 @@ interface FormData {
 interface InputFormProps {
   onSubmit: (formData: FormData) => void;
   isLoading: boolean;
+  formData?: FormData;
+  setFormData?: React.Dispatch<React.SetStateAction<FormData>>;
+  highlightedField?: string | null;
 }
 
 const CATEGORIES = [
@@ -50,22 +54,70 @@ const COMMON_INTERESTS = [
   '재테크', '자기계발', '공부', '취미', '스포츠', '문화생활'
 ];
 
-export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
-  const [formData, setFormData] = useState<FormData>({
+export default function InputForm({
+  onSubmit,
+  isLoading,
+  formData: externalFormData,
+  setFormData: externalSetFormData,
+  highlightedField
+}: InputFormProps) {
+  const [searchParams] = useSearchParams();
+
+  // 외부에서 formData를 제공하면 사용, 아니면 내부 state 사용
+  const [internalFormData, setInternalFormData] = useState<FormData>({
     product_name: '',
     product_description: '',
     category: 'beauty',
-    target_age: '20-29',
-    target_gender: '여성',
+    target_ages: ['20-29'],
+    target_genders: ['여성'],
     target_interests: [] as string[],
     copy_tone: 'professional',
   });
 
+  const formData = externalFormData || internalFormData;
+  const setFormData = externalSetFormData || setInternalFormData;
+
   const [customInterest, setCustomInterest] = useState<string>('');
+
+  // URL 파라미터에서 타겟 정보 읽어오기
+  useEffect(() => {
+    const ages = searchParams.get('ages');
+    const genders = searchParams.get('genders');
+    const category = searchParams.get('category');
+    const interests = searchParams.get('interests');
+
+    if (ages || genders || category || interests) {
+      setFormData(prev => ({
+        ...prev,
+        target_ages: ages ? ages.split(',') : prev.target_ages,
+        target_genders: genders ? genders.split(',') : prev.target_genders,
+        category: category || prev.category,
+        target_interests: interests ? interests.split(',') : prev.target_interests,
+      }));
+    }
+  }, [searchParams]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleAgeToggle = (age: string) => {
+    setFormData(prev => ({
+      ...prev,
+      target_ages: prev.target_ages.includes(age)
+        ? prev.target_ages.filter(a => a !== age)
+        : [...prev.target_ages, age]
+    }));
+  };
+
+  const handleGenderToggle = (gender: string) => {
+    setFormData(prev => ({
+      ...prev,
+      target_genders: prev.target_genders.includes(gender)
+        ? prev.target_genders.filter(g => g !== gender)
+        : [...prev.target_genders, gender]
+    }));
   };
 
   const handleInterestToggle = (interest: string) => {
@@ -104,6 +156,18 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
     }
     if (!formData.product_description.trim()) {
       alert('제품 설명을 입력해주세요.');
+      return;
+    }
+    if (!formData.category) {
+      alert('카테고리를 선택해주세요.');
+      return;
+    }
+    if (formData.target_ages.length === 0) {
+      alert('타겟 나이대를 최소 1개 이상 선택해주세요.');
+      return;
+    }
+    if (formData.target_genders.length === 0) {
+      alert('타겟 성별을 최소 1개 이상 선택해주세요.');
       return;
     }
     if (formData.target_interests.length === 0) {
@@ -164,9 +228,12 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled={isLoading}
+            required
           >
             {CATEGORIES.map(cat => (
-              <option key={cat.value} value={cat.value}>{cat.label}</option>
+              <option key={cat.value} value={cat.value}>
+                {cat.label}
+              </option>
             ))}
           </select>
         </div>
@@ -176,39 +243,49 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-gray-700">타겟 고객 정보</h3>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              나이대 *
-            </label>
-            <select
-              name="target_age"
-              value={formData.target_age}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={isLoading}
-            >
-              {AGE_GROUPS.map(age => (
-                <option key={age.value} value={age.value}>{age.label}</option>
-              ))}
-            </select>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            나이대 * (중복 선택 가능)
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {AGE_GROUPS.map(age => (
+              <button
+                key={age.value}
+                type="button"
+                onClick={() => handleAgeToggle(age.value)}
+                className={`px-4 py-2 rounded-lg text-sm transition-colors ${
+                  formData.target_ages.includes(age.value)
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+                disabled={isLoading}
+              >
+                {age.label}
+              </button>
+            ))}
           </div>
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              성별 *
-            </label>
-            <select
-              name="target_gender"
-              value={formData.target_gender}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={isLoading}
-            >
-              {GENDERS.map(gender => (
-                <option key={gender.value} value={gender.value}>{gender.label}</option>
-              ))}
-            </select>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            성별 * (중복 선택 가능)
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {GENDERS.map(gender => (
+              <button
+                key={gender.value}
+                type="button"
+                onClick={() => handleGenderToggle(gender.value)}
+                className={`px-4 py-2 rounded-lg text-sm transition-colors ${
+                  formData.target_genders.includes(gender.value)
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+                disabled={isLoading}
+              >
+                {gender.label}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -294,25 +371,23 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
         </label>
         <div className="grid grid-cols-3 gap-3">
           {TONES.map(tone => (
-            <label
+            <button
               key={tone.value}
-              className={`flex items-center justify-center px-4 py-3 border-2 rounded-lg cursor-pointer transition-colors ${
+              type="button"
+              onClick={() => {
+                if (!isLoading) {
+                  setFormData(prev => ({ ...prev, copy_tone: tone.value }));
+                }
+              }}
+              className={`flex items-center justify-center px-4 py-3 border-2 rounded-lg transition-colors ${
                 formData.copy_tone === tone.value
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-300 hover:border-gray-400'
-              } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  ? 'border-blue-500 bg-blue-50 text-gray-900'
+                  : 'border-gray-300 hover:border-gray-400 text-gray-700'
+              } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              disabled={isLoading}
             >
-              <input
-                type="radio"
-                name="copy_tone"
-                value={tone.value}
-                checked={formData.copy_tone === tone.value}
-                onChange={handleChange}
-                className="sr-only"
-                disabled={isLoading}
-              />
               <span className="text-sm text-center">{tone.label}</span>
-            </label>
+            </button>
           ))}
         </div>
       </div>
