@@ -232,6 +232,20 @@ JSON만 출력해주세요.
 타겟: {target_age} {target_gender}, 관심사: {interests_str}
 요청된 톤: {copy_tone} ({tone_desc})
 
+**카피 작성 원칙:**
+1. **강력한 후크**: 첫 3초 안에 타겟의 관심을 사로잡아야 합니다
+2. **감정 유발**: 공감, 설렘, 궁금증, 욕구 중 하나를 강하게 자극하세요
+3. **차별화된 가치**: 경쟁사와 구별되는 핵심 베네핏을 명확하게 전달하세요
+4. **행동 유도**: 클릭, 구매, 저장 등 구체적인 행동을 유도하세요
+5. **타겟 언어 사용**: 타겟이 일상에서 쓰는 표현과 말투를 사용하세요
+
+**성과 높은 카피의 특징:**
+- 타겟의 pain point를 정확히 짚어냅니다
+- 구체적인 숫자나 사실을 포함합니다
+- 호기심을 자극하는 질문이나 문장을 사용합니다
+- 타겟이 원하는 결과를 명확히 제시합니다
+- 긴급성이나 희소성을 암시합니다
+
 위 전략을 기반으로 **{copy_tone}** 톤의 광고 카피를 작성해주세요.
 
 **해시태그 생성 가이드 (15-20개):**
@@ -295,16 +309,18 @@ JSON만 출력해주세요.
             영어 이미지 프롬프트
         """
         prompt = f"""
-You are an expert at creating highly detailed image generation prompts for marketing and advertising visuals.
+You are an expert at creating highly detailed image generation prompts for high-converting marketing and advertising visuals.
 
-Create a professional, detailed image generation prompt based on the following marketing information:
+Create a professional, detailed image generation prompt that will maximize engagement, clicks, and conversion rates.
 
 Copy: "{copy_text}"
 Product: {product_name}
 Target Audience: {target_age} {target_gender}
 Marketing Strategy: {strategy.get('name')}
 
-REQUIREMENTS for the prompt:
+**CRITICAL: The image must be eye-catching, scroll-stopping, and highly shareable.**
+
+REQUIREMENTS for a HIGH-PERFORMING visual:
 
 1. COMPOSITION & SUBJECT:
    - Clearly describe the main subject (product, person, or scene)

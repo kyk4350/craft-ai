@@ -5,14 +5,27 @@ import ContentResult from '../components/ContentResult';
 export default function GeneratePageNew() {
   const [generatedContent, setGeneratedContent] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [progressMessage, setProgressMessage] = useState<string>('');
+  const [progressStep, setProgressStep] = useState<number>(0);
+  const [progressTotal, setProgressTotal] = useState<number>(8);
 
   const handleContentGenerated = (content: any) => {
     setGeneratedContent(content);
     setIsGenerating(false);
+    setProgressMessage('');
+    setProgressStep(0);
   };
 
   const handleGenerationStart = () => {
     setIsGenerating(true);
+    setProgressMessage('🎯 콘텐츠 생성을 시작합니다...');
+    setProgressStep(0);
+  };
+
+  const handleProgress = (step: number, total: number, message: string) => {
+    setProgressStep(step);
+    setProgressTotal(total);
+    setProgressMessage(message);
   };
 
   return (
@@ -30,6 +43,7 @@ export default function GeneratePageNew() {
           <ConversationalChatbot
             onContentGenerated={handleContentGenerated}
             onGenerationStart={handleGenerationStart}
+            onProgress={handleProgress}
             currentContent={generatedContent}
           />
         </div>
@@ -48,8 +62,35 @@ export default function GeneratePageNew() {
           {isGenerating ? (
             <div className="flex flex-col items-center justify-center h-full">
               <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
-              <p className="mt-4 text-gray-600 font-medium">콘텐츠 생성 중...</p>
-              <p className="mt-2 text-sm text-gray-500">AI가 최적의 콘텐츠를 만들고 있습니다</p>
+              <p className="mt-6 text-gray-700 font-semibold text-lg">
+                {progressMessage || '콘텐츠 생성 중...'}
+              </p>
+
+              {/* 진행 단계 표시 (SSE 사용 시에만) */}
+              {progressStep > 0 && (
+                <>
+                  <div className="mt-4 flex items-center space-x-2">
+                    {Array.from({ length: progressTotal }).map((_, index) => (
+                      <div
+                        key={index}
+                        className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                          index <= progressStep
+                            ? 'bg-blue-600 scale-110'
+                            : 'bg-gray-300'
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  <p className="mt-3 text-sm text-gray-500">
+                    {progressStep + 1} / {progressTotal} 단계
+                  </p>
+
+                  <p className="mt-6 text-xs text-gray-400 max-w-md text-center">
+                    백엔드에서 실시간으로 진행 상태를 전송하고 있습니다
+                  </p>
+                </>
+              )}
             </div>
           ) : generatedContent ? (
             <ContentResult content={generatedContent} />

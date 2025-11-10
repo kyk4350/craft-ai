@@ -123,7 +123,7 @@ class PerformanceService:
 
         prompt = f"""
 당신은 마케팅 성과 분석 전문가입니다.
-아래 페르소나들이 주어진 마케팅 콘텐츠를 봤을 때의 반응을 시뮬레이션하세요.
+아래 페르소나들이 주어진 마케팅 콘텐츠를 봤을 때의 반응을 객관적으로 시뮬레이션하세요.
 
 **페르소나 정보:**
 {json.dumps(personas, ensure_ascii=False, indent=2)}
@@ -222,7 +222,7 @@ class PerformanceService:
                 target_age_group=content.target_age_group or "20대",
                 target_gender=content.target_gender or "무관",
                 target_interests=content.target_interests or ["일반"],
-                count=100  # 100명의 페르소나로 더 정확한 시뮬레이션
+                count=30  # 30명 페르소나 (100명은 JSON 파싱 에러 발생) + scale_factor로 실제 규모 반영
             )
 
             if not personas:

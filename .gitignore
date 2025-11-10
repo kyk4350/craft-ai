@@ -98,3 +98,6 @@ backend/storage/images/*.png
 backend/storage/images/*.jpg
 backend/storage/images/*.jpeg
 backend/storage/images/*.webp
+
+# Static files (uploaded/generated images)
+backend/static/

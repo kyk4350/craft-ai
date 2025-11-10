@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
+import { fetchSSE, SSEMessage } from '../utils/sse';
 
 interface Message {
   role: 'assistant' | 'user';
@@ -13,6 +14,7 @@ interface Message {
 interface ConversationalChatbotProps {
   onContentGenerated: (content: any) => void;
   onGenerationStart: () => void;
+  onProgress?: (step: number, total: number, message: string) => void;
   currentContent?: any; // 현재 생성된 콘텐츠 (수정 요청 시 사용)
 }
 
@@ -30,6 +32,7 @@ interface CollectedInfo {
 export default function ConversationalChatbot({
   onContentGenerated,
   onGenerationStart,
+  onProgress,
   currentContent
 }: ConversationalChatbotProps) {
   const { token } = useAuthStore();
@@ -306,7 +309,12 @@ export default function ConversationalChatbot({
     setIsLoading(true);
 
     try {
-      if (message === '전체 다시 생성') {
+      if (message === '새 콘텐츠 생성') {
+        // 페이지 새로고침으로 완전히 새로 시작
+        window.location.reload();
+        return;
+
+      } else if (message === '전체 다시 생성') {
         // 전체 재생성
         setMessages(prev => [
           ...prev,
@@ -503,7 +511,7 @@ export default function ConversationalChatbot({
         });
 
       } else {
-        // 'all' 또는 'auto' - 전체 재생성
+        // 'all' 또는 'auto' - 전체 재생성 (SSE 사용)
         const formData = {
           product_name: collectedInfo.product_name || '',
           product_description: collectedInfo.product_description || '',
@@ -517,23 +525,45 @@ export default function ConversationalChatbot({
           custom_request: params?.request || ''
         };
 
-        console.log('재생성 요청 데이터:', formData); // 디버깅
+        console.log('전체 재생성 요청 (SSE):', formData);
 
-        response = await axios.post('http://localhost:8000/api/content/generate', formData, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        // SSE로 전체 재생성
+        await fetchSSE(
+          'http://localhost:8000/api/content/generate-stream',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(formData)
+          },
+          (message: SSEMessage) => {
+            console.log('SSE 메시지 (재생성):', message);
+
+            if (message.type === 'progress') {
+              if (onProgress && message.step !== undefined && message.total !== undefined && message.message) {
+                onProgress(message.step, message.total, message.message);
+              }
+            } else if (message.type === 'complete') {
+              onContentGenerated(message.data);
+              response = { data: { success: true, data: message.data } };
+            } else if (message.type === 'error') {
+              throw new Error(message.message || '콘텐츠 재생성 중 오류 발생');
+            }
+          },
+          (error) => { throw error; }
+        );
       }
 
-      if (response.data.success) {
+      if (response && response.data.success) {
         onContentGenerated(response.data.data);
         setMessages(prev => [
           ...prev,
           {
             role: 'assistant',
             content: '✨ 수정이 완료되었습니다! 오른쪽에서 확인해보세요.\n\n추가 수정이 필요하시면 아래 옵션을 선택해주세요.',
-            options: ['전체 다시 생성', '이미지만 다시 생성', '카피만 다시 생성', '카피 톤 변경', '직접 입력']
+            options: ['새 콘텐츠 생성', '전체 다시 생성', '이미지만 다시 생성', '카피만 다시 생성', '카피 톤 변경']
           }
         ]);
       }
@@ -615,30 +645,52 @@ export default function ConversationalChatbot({
       console.log('전송할 formData:', formData);
       console.log('========================');
 
-      const response = await axios.post('http://localhost:8000/api/content/generate', formData, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      // SSE로 실시간 진행 상태를 받으며 콘텐츠 생성
+      await fetchSSE(
+        'http://localhost:8000/api/content/generate-stream',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(formData)
+        },
+        (message: SSEMessage) => {
+          console.log('SSE 메시지:', message);
 
-      console.log('API Response:', response.data); // 디버깅용
+          if (message.type === 'progress') {
+            // 진행 상태 업데이트
+            if (onProgress && message.step !== undefined && message.total !== undefined && message.message) {
+              onProgress(message.step, message.total, message.message);
+            }
+          } else if (message.type === 'complete') {
+            // 생성 완료
+            console.log('Content Data:', message.data);
+            onContentGenerated(message.data);
 
-      if (response.data.success) {
-        console.log('Content Data:', response.data.data); // 디버깅용
-        onContentGenerated(response.data.data);
+            // 생성 완료 - currentStep을 conversationFlow.length 이상으로 설정
+            setCurrentStep(conversationFlow.length);
 
-        // 생성 완료 - currentStep을 conversationFlow.length 이상으로 설정
-        setCurrentStep(conversationFlow.length);
-
-        setMessages(prev => [
-          ...prev,
-          {
-            role: 'assistant',
-            content: '✨ 콘텐츠 생성이 완료되었습니다!\n\n제품 분석을 바탕으로 최적의 타겟층을 선정하고, 현재 트렌드에 맞는 이미지와 카피를 생성했습니다. 오른쪽에서 확인해보세요!\n\n수정이 필요하시면 아래 옵션을 선택하거나 직접 입력해주세요.',
-            options: ['전체 다시 생성', '이미지만 다시 생성', '카피만 다시 생성', '카피 톤 변경', '직접 입력']
+            setMessages(prev => [
+              ...prev,
+              {
+                role: 'assistant',
+                content: '✨ 콘텐츠 생성이 완료되었습니다!\n\n제품 분석을 바탕으로 최적의 타겟층을 선정하고, 현재 트렌드에 맞는 이미지와 카피를 생성했습니다. 오른쪽에서 확인해보세요!\n\n수정이 필요하시면 아래 옵션을 선택하거나 직접 입력해주세요.',
+                options: ['새 콘텐츠 생성', '전체 다시 생성', '이미지만 다시 생성', '카피만 다시 생성', '카피 톤 변경']
+              }
+            ]);
+          } else if (message.type === 'error') {
+            // 에러 처리
+            throw new Error(message.message || '콘텐츠 생성 중 오류 발생');
           }
-        ]);
-      }
+        },
+        (error) => {
+          // 에러 처리
+          console.error('SSE Error:', error);
+          throw error;
+        }
+      );
     } catch (error: any) {
       console.error('Error generating content:', error);
       setMessages(prev => [

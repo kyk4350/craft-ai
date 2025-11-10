@@ -4,9 +4,13 @@
 """
 
 from fastapi import APIRouter, HTTPException, Depends
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 import logging
 import time
+import json
+import asyncio
+from typing import AsyncGenerator
 
 from app.schemas.content import (
     FullContentGenerationRequest,
@@ -70,9 +74,20 @@ async def generate_full_content(
                 request.regenerate_type = intent_analysis.get("type", "all")
                 logger.info(f"재생성 타입 결정: {request.regenerate_type}")
 
-        # 다중 타겟을 문자열로 변환
-        target_age_str = ", ".join(request.target_ages) if len(request.target_ages) > 1 else request.target_ages[0]
-        target_gender_str = ", ".join(request.target_genders) if len(request.target_genders) > 1 else request.target_genders[0]
+        # 다중 타겟을 문자열로 변환 (빈 배열이면 "AI 자동 분석"으로 표시)
+        if len(request.target_ages) > 1:
+            target_age_str = ", ".join(request.target_ages)
+        elif len(request.target_ages) == 1:
+            target_age_str = request.target_ages[0]
+        else:
+            target_age_str = "AI 자동 분석"
+
+        if len(request.target_genders) > 1:
+            target_gender_str = ", ".join(request.target_genders)
+        elif len(request.target_genders) == 1:
+            target_gender_str = request.target_genders[0]
+        else:
+            target_gender_str = "무관"
 
         logger.info(f"카테고리: {request.category} / 타겟: {target_age_str} / {target_gender_str}")
 
@@ -966,3 +981,305 @@ async def regenerate_copy_only(
             status_code=500,
             detail=f"카피 재생성 중 오류가 발생했습니다: {str(e)}"
         )
+
+
+
+# ============================================================
+# SSE 스트리밍 콘텐츠 생성
+# ============================================================
+
+@router.post("/generate-stream")
+async def generate_content_with_stream(
+    request: FullContentGenerationRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    SSE를 사용한 실시간 진행 상태 스트리밍 콘텐츠 생성
+    
+    프론트엔드에서 EventSource로 연결:
+    const eventSource = new EventSource('/api/content/generate-stream');
+    eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        // data.type: 'progress' | 'complete' | 'error'
+    };
+    """
+    
+    async def generate_with_progress():
+        """진행 상태를 SSE로 전송하며 콘텐츠 생성"""
+        try:
+            start_time = time.time()
+            
+            # 진행 상태 전송 헬퍼 함수
+            def send_progress(step: int, total: int, message: str):
+                data = {
+                    "type": "progress",
+                    "step": step,
+                    "total": total,
+                    "message": message
+                }
+                return f"data: {json.dumps(data, ensure_ascii=False)}\n\n"
+            
+            # 시작
+            yield send_progress(0, 8, "🎯 제품 정보를 분석하고 있습니다...")
+            
+            logger.info(f"통합 콘텐츠 생성 시작: {request.product_name}")
+            
+            # 타겟 문자열 변환
+            if len(request.target_ages) > 1:
+                target_age_str = ", ".join(request.target_ages)
+            elif len(request.target_ages) == 1:
+                target_age_str = request.target_ages[0]
+            else:
+                target_age_str = "AI 자동 분석"
+            
+            if len(request.target_genders) > 1:
+                target_gender_str = ", ".join(request.target_genders)
+            elif len(request.target_genders) == 1:
+                target_gender_str = request.target_genders[0]
+            else:
+                target_gender_str = "무관"
+            
+            # 0단계: AI 타겟 인사이트 분석
+            yield send_progress(1, 8, "🧠 AI가 타겟 고객을 분석하고 있습니다...")
+            await asyncio.sleep(0.1)  # 메시지 전송 시간 확보
+
+            target_insights = await gemini_service.analyze_target_insights(
+                product_name=request.product_name,
+                product_description=request.product_description,
+                category=request.category,
+                target_ages=request.target_ages,
+                target_genders=request.target_genders,
+                target_interests=request.target_interests
+            )
+
+            final_target_ages = target_insights.get('target_ages', request.target_ages) if not request.target_ages or len(request.target_ages) == 0 else request.target_ages
+            final_target_interests = target_insights.get('target_interests', request.target_interests) if not request.target_interests or len(request.target_interests) == 0 else request.target_interests
+
+            # 1단계: RAG 검색 + 마케팅 전략 생성
+            yield send_progress(2, 8, "💡 마케팅 전략을 수립하고 있습니다...")
+            await asyncio.sleep(0.1)
+            
+            past_performance = []
+            try:
+                query_text = f"제품: {request.product_name}\n설명: {request.product_description}\n카테고리: {request.category}"
+                past_performance = vector_service.get_performance_reference(
+                    query_text=query_text,
+                    target_age=target_age_str if len(final_target_ages) == 1 else None,
+                    target_gender=target_gender_str if target_gender_str != "무관" else None,
+                    category=request.category,
+                    limit=3
+                )
+            except Exception as e:
+                logger.warning(f"⚠️ RAG 검색 실패 (계속 진행): {str(e)}")
+            
+            # 2단계: 마케팅 전략 생성
+            strategies = await gemini_service.generate_marketing_strategies(
+                product_name=request.product_name,
+                product_description=request.product_description,
+                category=request.category,
+                target_age=", ".join(final_target_ages),
+                target_gender=target_gender_str,
+                target_interests=final_target_interests,
+                past_performance=past_performance
+            )
+            
+            selected_strategy = strategies[0] if strategies else None
+            
+            # 3단계: 카피 생성
+            yield send_progress(3, 8, "✍️ 매력적인 카피를 작성하고 있습니다...")
+            await asyncio.sleep(0.1)
+
+            copies = await gemini_service.generate_copies(
+                product_name=request.product_name,
+                product_description=request.product_description,
+                strategy=selected_strategy,
+                target_age=", ".join(final_target_ages),
+                target_gender=target_gender_str,
+                target_interests=final_target_interests,
+                copy_tone=request.copy_tone
+            )
+
+            selected_copy = copies[0]
+            
+            # 4단계: 이미지 프롬프트 생성
+            yield send_progress(4, 8, "🎨 이미지 프롬프트를 생성하고 있습니다...")
+            await asyncio.sleep(0.1)
+
+            image_prompt = await gemini_service.convert_to_image_prompt(
+                copy_text=selected_copy["text"],
+                product_name=request.product_name,
+                target_age=", ".join(final_target_ages),
+                target_gender=target_gender_str,
+                strategy=selected_strategy
+            )
+            
+            # 5단계: 이미지 생성
+            yield send_progress(5, 8, "🖼️ 고품질 이미지를 생성하고 있습니다...")
+            await asyncio.sleep(0.1)
+
+            # 이미지 생성 서비스 선택 (settings.IMAGE_PROVIDER)
+            image_provider = settings.IMAGE_PROVIDER.lower()
+
+            # 제품 이미지가 있으면 제품 기반 생성 시도
+            if request.product_image_path:
+                import os
+                if os.path.exists(request.product_image_path):
+                    logger.info("제품 이미지 기반 마케팅 이미지 생성 시작...")
+
+                    # 마케팅 프롬프트 생성
+                    marketing_prompt = f"{image_prompt}\n\nMust include the actual product prominently in the image."
+
+                    # nanobanana로 제품 이미지 기반 생성
+                    image_result = await nanobanana_service.generate_from_product_image(
+                        product_image_path=request.product_image_path,
+                        prompt=marketing_prompt,
+                        save_local=True
+                    )
+                    provider_name = "nanobanana (product-based)"
+                else:
+                    logger.warning(f"제품 이미지 파일 없음, 일반 이미지 생성으로 대체")
+                    if image_provider == "nanobanana":
+                        image_result = await nanobanana_service.generate_image(
+                            prompt=image_prompt,
+                            width=1024,
+                            height=1024,
+                            save_local=True
+                        )
+                        provider_name = "nanobanana"
+                    else:
+                        image_result = await replicate_service.generate_image(
+                            prompt=image_prompt,
+                            width=1024,
+                            height=1024,
+                            save_local=True
+                        )
+                        provider_name = "replicate"
+            else:
+                # 제품 이미지 없으면 일반 이미지 생성
+                if image_provider == "nanobanana":
+                    logger.info("이미지 생성 서비스: Nano Banana (Gemini 2.5 Flash Image)")
+                    image_result = await nanobanana_service.generate_image(
+                        prompt=image_prompt,
+                        width=1024,
+                        height=1024,
+                        save_local=True
+                    )
+                    provider_name = "nanobanana"
+                else:
+                    logger.info("이미지 생성 서비스: Replicate (SDXL/Ideogram)")
+                    image_result = await replicate_service.generate_image(
+                        prompt=image_prompt,
+                        width=1024,
+                        height=1024,
+                        save_local=True
+                    )
+                    provider_name = "replicate"
+
+            logger.info(f"✓ 이미지 생성 완료 (provider: {provider_name})")
+            
+            # DB 저장
+            content = Content(
+                user_id=current_user.id,
+                product_name=request.product_name,
+                product_description=request.product_description,
+                category=request.category,
+                target_age_group=", ".join(final_target_ages),
+                target_gender=target_gender_str,
+                target_interests=final_target_interests,
+                strategy=selected_strategy,
+                copy_text=selected_copy["text"],
+                copy_tone=request.copy_tone,
+                image_url=image_result.get("local_url") or image_result["original_url"],
+                image_prompt=image_prompt,
+                image_provider=provider_name,
+                status=ContentStatus.COMPLETED
+            )
+            db.add(content)
+            db.commit()
+            db.refresh(content)
+            
+            # 6단계: 성과 예측
+            yield send_progress(6, 8, "📊 성과를 예측하고 있습니다...")
+            await asyncio.sleep(0.1)
+
+            from app.services.performance_service import PerformanceService
+            performance_service = PerformanceService(db)
+            performance = await performance_service.predict_performance(content.id)
+
+            # 7단계: Vector DB 저장
+            yield send_progress(7, 8, "✨ 최종 콘텐츠를 완성하고 있습니다...")
+            await asyncio.sleep(0.1)
+            
+            try:
+                vector_service.save_content(
+                    content_id=content.id,
+                    copy_text=content.copy_text,
+                    image_prompt=content.image_prompt,
+                    target_age=content.target_age_group,
+                    target_gender=content.target_gender,
+                    category=content.category
+                )
+            except Exception as e:
+                logger.error(f"Vector DB 저장 실패: {str(e)}")
+            
+            # 완료 - 최종 데이터 전송
+            generation_time = time.time() - start_time
+            
+            response_data = {
+                "id": content.id,
+                "product_name": content.product_name,
+                "strategies": strategies,
+                "selected_strategy": selected_strategy,
+                "copy": {
+                    "text": content.copy_text,
+                    "tone": content.copy_tone
+                },
+                "image": {
+                    "url": content.image_url,
+                    "prompt": content.image_prompt
+                },
+                "target_ages": final_target_ages,
+                "target_genders": [target_gender_str],
+                "target_interests": final_target_interests,
+                "created_at": content.created_at.isoformat() if content.created_at else None
+            }
+            
+            if performance:
+                response_data["performance_prediction"] = {
+                    "impressions": performance.impressions,
+                    "clicks": performance.clicks,
+                    "ctr": performance.ctr,
+                    "engagement_rate": performance.engagement_rate,
+                    "conversion_rate": performance.conversion_rate,
+                    "brand_recall_score": performance.brand_recall_score,
+                    "confidence_score": performance.confidence_score
+                }
+            
+            complete_data = {
+                "type": "complete",
+                "data": response_data,
+                "generation_time": generation_time
+            }
+            yield f"data: {json.dumps(complete_data, ensure_ascii=False)}\n\n"
+            
+        except Exception as e:
+            logger.error(f"스트리밍 생성 실패: {str(e)}")
+            import traceback
+            logger.error(traceback.format_exc())
+            
+            error_data = {
+                "type": "error",
+                "message": str(e)
+            }
+            yield f"data: {json.dumps(error_data, ensure_ascii=False)}\n\n"
+    
+    return StreamingResponse(
+        generate_with_progress(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"
+        }
+    )
